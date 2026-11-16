@@ -59,6 +59,13 @@ export const states = defineSource({
   }),
   watch: (ctx, emit) => connect({ url: ctx.options.url, token: ctx.options.token, entities: ctx.options.entities, history: ctx.options.history, maxHistory: ctx.options.maxHistory }, emit, { signal: ctx.signal, log: ctx.log }),
   demo: ({ now, locale }) => demoHome(now, locale),
+  // Every entity it reads, by name, grouped by domain: for the entity field and the filters.
+  choices: {
+    entities: (d: HaData) =>
+      Object.values(d?.entities ?? {})
+        .sort((a, b) => a.domain.localeCompare(b.domain) || a.name.localeCompare(b.name))
+        .map((e) => ({ value: e.id, label: e.name, group: e.domain })),
+  },
 });
 
 const dataOf = (sources: Record<string, unknown>) => sources[SOURCE] as HaData | undefined;
@@ -119,6 +126,7 @@ export const entity = defineWidget({
   sources: [SOURCE],
   options: t.object({
     entity: t.string({
+      choices: { source: SOURCE, list: 'entities' },
       placeholder: 'sensor.living_room_temperature',
       label: { en: 'Entity', es: 'Entidad' },
       help: { en: 'Its id, as in Home Assistant → Settings → Devices & services → Entities.', es: 'Su id, como en Home Assistant → Ajustes → Dispositivos y servicios → Entidades.' },
@@ -170,6 +178,7 @@ export const entities = defineWidget({
   options: t.object({
     ...listOptions({ layouts: ['one-line', 'detailed'] }),
     entities: t.filter({
+      choices: { source: SOURCE, list: 'entities' },
       label: { en: 'Entities', es: 'Entidades' },
       help: { en: 'Ids or names, in the order to list them: sensor.*_temperature, light.*, *kitchen*, !light.porch. Empty = all.', es: 'Ids o nombres, en el orden en que listarlas: sensor.*_temperature, light.*, *cocina*, !light.porch. Vacío = todas.' },
     }),
@@ -246,7 +255,7 @@ export const attention = defineWidget({
   sources: [SOURCE],
   options: t.object({
     ...listOptions({ layouts: ['one-line', 'detailed'] }),
-    entities: t.filter({ label: { en: 'Entities', es: 'Entidades' }, help: { en: 'Empty = all. Leave out the ones that are fine open with !: !binary_sensor.patio_door.', es: 'Vacío = todas. Deja fuera con ! las que pueden estar abiertas: !binary_sensor.patio_door.' } }),
+    entities: t.filter({ choices: { source: SOURCE, list: 'entities' }, label: { en: 'Entities', es: 'Entidades' }, help: { en: 'Empty = all. Leave out the ones that are fine open with !: !binary_sensor.patio_door.', es: 'Vacío = todas. Deja fuera con ! las que pueden estar abiertas: !binary_sensor.patio_door.' } }),
     includeOpenings: t.boolean({ default: true, label: { en: 'Doors, windows and locks', es: 'Puertas, ventanas y cerraduras' }, help: { en: 'Open doors, windows, garage doors and gates; unlocked locks.', es: 'Puertas, ventanas, garajes y cancelas abiertas; cerraduras sin cerrar.' } }),
     openMs: t.duration({ default: 0, label: { en: 'Open for at least', es: 'Abierta al menos' }, help: { en: 'A door counts once it has been open this long. 0 = at once.', es: 'Una puerta cuenta cuando lleva abierta este tiempo. 0 = al momento.' } }),
     includeBatteries: t.boolean({ default: true, label: { en: 'Low batteries', es: 'Baterías bajas' } }),
@@ -305,6 +314,8 @@ export default definePlugin({
   id: 'homeassistant',
   name: { en: 'Home Assistant', es: 'Home Assistant' },
   version: '0.2.1',
+  sdk: '^0.2.0',
+  permissions: { network: ['user'] },
   description: {
     en: 'Home Assistant on the panel, live over its WebSocket API: any entity in big with its history, lists of entities, and what needs you at home (doors left open, low batteries, leaks, the alarm).',
     es: 'Home Assistant en el panel, en directo por su API WebSocket: cualquier entidad en grande con su histórico, listas de entidades y lo que te necesita en casa (puertas abiertas, baterías bajas, fugas, la alarma).',

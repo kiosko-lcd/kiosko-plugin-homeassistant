@@ -1,0 +1,872 @@
+{
+  "manifest": 1,
+  "id": "homeassistant",
+  "package": "kiosko-plugin-homeassistant",
+  "name": {
+    "en": "Home Assistant",
+    "es": "Home Assistant"
+  },
+  "version": "0.2.1",
+  "description": {
+    "en": "Home Assistant on the panel, live over its WebSocket API: any entity in big with its history, lists of entities, and what needs you at home (doors left open, low batteries, leaks, the alarm).",
+    "es": "Home Assistant en el panel, en directo por su API WebSocket: cualquier entidad en grande con su histórico, listas de entidades y lo que te necesita en casa (puertas abiertas, baterías bajas, fugas, la alarma)."
+  },
+  "author": "Loksly",
+  "license": "MIT",
+  "homepage": "https://github.com/kiosko-lcd/kiosko-plugin-homeassistant#readme",
+  "repository": "https://github.com/kiosko-lcd/kiosko-plugin-homeassistant.git",
+  "icon": "house",
+  "sdk": "^0.2.0",
+  "platforms": [
+    "linux",
+    "darwin",
+    "win32"
+  ],
+  "languages": [
+    "en",
+    "es"
+  ],
+  "categories": [
+    "info"
+  ],
+  "tags": [
+    "home assistant",
+    "smart home",
+    "sensor",
+    "alerts"
+  ],
+  "permissions": {
+    "network": [
+      "user"
+    ]
+  },
+  "riskyOptions": [
+    {
+      "path": "homeassistant/states: url",
+      "risk": [
+        "network"
+      ],
+      "secret": false
+    },
+    {
+      "path": "homeassistant/states: token",
+      "risk": [],
+      "secret": true
+    }
+  ],
+  "requires": [],
+  "optional": [],
+  "widgets": [
+    {
+      "type": "homeassistant/entity",
+      "name": {
+        "en": "Entity",
+        "es": "Entidad"
+      },
+      "description": {
+        "en": "One Home Assistant entity in big: a temperature, the power the house draws, a door, the thermostat. Numeric sensors can show their last hours as bars, and turn amber or red past thresholds of your own.",
+        "es": "Una entidad de Home Assistant en grande: una temperatura, lo que consume la casa, una puerta, el termostato. Los sensores numéricos pueden mostrar sus últimas horas en barras y ponerse en ámbar o rojo al pasar los umbrales que elijas."
+      },
+      "icon": "gauge",
+      "category": "info",
+      "tags": [
+        "home assistant",
+        "smart home",
+        "sensor"
+      ],
+      "size": {
+        "min": {
+          "w": 140,
+          "h": 80
+        },
+        "preferred": {
+          "w": 320,
+          "h": 200
+        }
+      },
+      "chrome": "card",
+      "sources": [
+        "homeassistant/states"
+      ],
+      "options": {
+        "default": {
+          "entity": "",
+          "name": "",
+          "showName": true,
+          "showHistory": true,
+          "historyMs": 86400000,
+          "decimals": -1,
+          "thresholds": "off",
+          "warn": 0,
+          "alert": 0
+        },
+        "x-ui": {},
+        "type": "object",
+        "properties": {
+          "entity": {
+            "title": "Entity",
+            "description": "Its id, as in Home Assistant → Settings → Devices & services → Entities.",
+            "default": "",
+            "x-ui": {
+              "label": {
+                "en": "Entity",
+                "es": "Entidad"
+              },
+              "help": {
+                "en": "Its id, as in Home Assistant → Settings → Devices & services → Entities.",
+                "es": "Su id, como en Home Assistant → Ajustes → Dispositivos y servicios → Entidades."
+              },
+              "placeholder": "sensor.living_room_temperature",
+              "choices": {
+                "source": "homeassistant/states",
+                "list": "entities"
+              }
+            },
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "description": "Empty = the name in Home Assistant.",
+            "default": "",
+            "x-ui": {
+              "label": {
+                "en": "Name",
+                "es": "Nombre"
+              },
+              "help": {
+                "en": "Empty = the name in Home Assistant.",
+                "es": "Vacío = el nombre en Home Assistant."
+              }
+            },
+            "type": "string"
+          },
+          "showName": {
+            "title": "Show the name",
+            "default": true,
+            "x-ui": {
+              "label": {
+                "en": "Show the name",
+                "es": "Mostrar el nombre"
+              }
+            },
+            "type": "boolean"
+          },
+          "showHistory": {
+            "title": "Show the history",
+            "description": "Numeric sensors only, when the source keeps their history.",
+            "default": true,
+            "x-ui": {
+              "label": {
+                "en": "Show the history",
+                "es": "Mostrar el histórico"
+              },
+              "help": {
+                "en": "Numeric sensors only, when the source keeps their history.",
+                "es": "Solo sensores numéricos cuyo histórico guarda la fuente."
+              }
+            },
+            "type": "boolean"
+          },
+          "historyMs": {
+            "title": "History span",
+            "default": 86400000,
+            "x-ui": {
+              "label": {
+                "en": "History span",
+                "es": "Periodo del histórico"
+              },
+              "unit": "ms"
+            },
+            "type": "integer",
+            "minimum": 3600000,
+            "maximum": 86400000
+          },
+          "decimals": {
+            "title": "Decimals",
+            "description": "-1 = automatic: fewer as the number grows.",
+            "default": -1,
+            "x-ui": {
+              "label": {
+                "en": "Decimals",
+                "es": "Decimales"
+              },
+              "help": {
+                "en": "-1 = automatic: fewer as the number grows.",
+                "es": "-1 = automático: menos cuanto mayor es el número."
+              },
+              "advanced": true
+            },
+            "type": "integer",
+            "minimum": -1,
+            "maximum": 4
+          },
+          "thresholds": {
+            "title": "Thresholds",
+            "default": "off",
+            "x-ui": {
+              "label": {
+                "en": "Thresholds",
+                "es": "Umbrales"
+              },
+              "labels": {
+                "off": {
+                  "en": "Off",
+                  "es": "No"
+                },
+                "above": {
+                  "en": "Warn above",
+                  "es": "Avisar por encima"
+                },
+                "below": {
+                  "en": "Warn below",
+                  "es": "Avisar por debajo"
+                }
+              }
+            },
+            "type": "string",
+            "enum": [
+              "off",
+              "above",
+              "below"
+            ]
+          },
+          "warn": {
+            "title": "Warning (amber) at",
+            "default": 0,
+            "x-ui": {
+              "label": {
+                "en": "Warning (amber) at",
+                "es": "Aviso (ámbar) en"
+              }
+            },
+            "type": "number",
+            "minimum": -1000000,
+            "maximum": 1000000
+          },
+          "alert": {
+            "title": "Alert (red) at",
+            "description": "Red, and the widget keeps its tile.",
+            "default": 0,
+            "x-ui": {
+              "label": {
+                "en": "Alert (red) at",
+                "es": "Alerta (rojo) en"
+              },
+              "help": {
+                "en": "Red, and the widget keeps its tile.",
+                "es": "Rojo, y el widget se queda con su tesela."
+              }
+            },
+            "type": "number",
+            "minimum": -1000000,
+            "maximum": 1000000
+          }
+        }
+      },
+      "screenshot": "docs/entity.png",
+      "animated": false,
+      "urgent": true
+    },
+    {
+      "type": "homeassistant/entities",
+      "name": {
+        "en": "Entities",
+        "es": "Entidades"
+      },
+      "description": {
+        "en": "A list of Home Assistant entities and their states, picked by id or name with patterns (sensor.*_temperature, light.*). Open doors, low batteries and alarms are coloured; the rest stays quiet.",
+        "es": "Una lista de entidades de Home Assistant con sus estados, elegidas por id o nombre con patrones (sensor.*_temperature, light.*). Puertas abiertas, baterías bajas y alarmas llevan color; el resto, discreto."
+      },
+      "icon": "list",
+      "category": "info",
+      "tags": [
+        "home assistant",
+        "smart home"
+      ],
+      "size": {
+        "min": {
+          "w": 220,
+          "h": 90
+        },
+        "preferred": {
+          "w": 480,
+          "h": 260
+        }
+      },
+      "chrome": "card",
+      "sources": [
+        "homeassistant/states"
+      ],
+      "options": {
+        "default": {
+          "rows": 0,
+          "layout": "auto",
+          "entities": [],
+          "hideOff": false,
+          "hideUnavailable": false,
+          "decimals": -1,
+          "batteryWarn": 20,
+          "batteryAlert": 10
+        },
+        "x-ui": {},
+        "type": "object",
+        "properties": {
+          "rows": {
+            "title": "Rows",
+            "description": "0 = as many as fit. A number shows that many, in rows of a readable size (fewer when the tile is too small for them); the rest are counted in \"+N more\".",
+            "default": 0,
+            "x-ui": {
+              "label": {
+                "en": "Rows",
+                "es": "Filas"
+              },
+              "help": {
+                "en": "0 = as many as fit. A number shows that many, in rows of a readable size (fewer when the tile is too small for them); the rest are counted in \"+N more\".",
+                "es": "0 = las que quepan. Con un número se ven esas, en filas de un tamaño legible (menos si la tesela no da para ellas); el resto se cuenta en «+N más»."
+              }
+            },
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 30
+          },
+          "layout": {
+            "title": "Row layout",
+            "description": "Automatic: the widget picks by the tile's shape.",
+            "default": "auto",
+            "x-ui": {
+              "label": {
+                "en": "Row layout",
+                "es": "Formato de fila"
+              },
+              "help": {
+                "en": "Automatic: the widget picks by the tile's shape.",
+                "es": "Automático: el widget elige según la forma de la tesela."
+              },
+              "labels": {
+                "auto": {
+                  "en": "Automatic",
+                  "es": "Automático"
+                },
+                "one-line": {
+                  "en": "One line",
+                  "es": "Una línea"
+                },
+                "detailed": {
+                  "en": "Detailed",
+                  "es": "Detallado"
+                }
+              }
+            },
+            "type": "string",
+            "enum": [
+              "auto",
+              "one-line",
+              "detailed"
+            ]
+          },
+          "entities": {
+            "title": "Entities",
+            "description": "Ids or names, in the order to list them: sensor.*_temperature, light.*, *kitchen*, !light.porch. Empty = all.",
+            "default": [],
+            "x-ui": {
+              "label": {
+                "en": "Entities",
+                "es": "Entidades"
+              },
+              "help": {
+                "en": "Ids or names, in the order to list them: sensor.*_temperature, light.*, *kitchen*, !light.porch. Empty = all.",
+                "es": "Ids o nombres, en el orden en que listarlas: sensor.*_temperature, light.*, *cocina*, !light.porch. Vacío = todas."
+              },
+              "widget": "filter",
+              "choices": {
+                "source": "homeassistant/states",
+                "list": "entities"
+              }
+            },
+            "type": "array",
+            "items": {
+              "default": "",
+              "x-ui": {
+                "placeholder": "name, group/*, !old-*",
+                "choices": {
+                  "source": "homeassistant/states",
+                  "list": "entities"
+                }
+              },
+              "type": "string"
+            },
+            "x-filter": true
+          },
+          "hideOff": {
+            "title": "Only what is on, open or wrong",
+            "description": "Leaves out what is off or closed. Numbers always stay.",
+            "default": false,
+            "x-ui": {
+              "label": {
+                "en": "Only what is on, open or wrong",
+                "es": "Solo lo encendido, abierto o con problemas"
+              },
+              "help": {
+                "en": "Leaves out what is off or closed. Numbers always stay.",
+                "es": "Deja fuera lo apagado o cerrado. Los números se quedan siempre."
+              }
+            },
+            "type": "boolean"
+          },
+          "hideUnavailable": {
+            "title": "Hide unavailable entities",
+            "default": false,
+            "x-ui": {
+              "label": {
+                "en": "Hide unavailable entities",
+                "es": "Ocultar las entidades no disponibles"
+              }
+            },
+            "type": "boolean"
+          },
+          "decimals": {
+            "title": "Decimals",
+            "description": "-1 = automatic.",
+            "default": -1,
+            "x-ui": {
+              "label": {
+                "en": "Decimals",
+                "es": "Decimales"
+              },
+              "help": {
+                "en": "-1 = automatic.",
+                "es": "-1 = automático."
+              },
+              "advanced": true
+            },
+            "type": "integer",
+            "minimum": -1,
+            "maximum": 4
+          },
+          "batteryWarn": {
+            "title": "Battery warning at",
+            "default": 20,
+            "x-ui": {
+              "label": {
+                "en": "Battery warning at",
+                "es": "Batería en aviso desde"
+              },
+              "advanced": true,
+              "unit": "%"
+            },
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 100
+          },
+          "batteryAlert": {
+            "title": "Battery alert at",
+            "default": 10,
+            "x-ui": {
+              "label": {
+                "en": "Battery alert at",
+                "es": "Batería en alerta desde"
+              },
+              "advanced": true,
+              "unit": "%"
+            },
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 100
+          }
+        }
+      },
+      "screenshot": "docs/entities.png",
+      "animated": false,
+      "urgent": false
+    },
+    {
+      "type": "homeassistant/attention",
+      "name": {
+        "en": "Home: needs you",
+        "es": "Casa: te necesita"
+      },
+      "description": {
+        "en": "Only what needs you at home: smoke, a leak or the alarm in red (and it keeps its tile until they stop), then doors and windows left open, unlocked locks, low batteries and problems. Hides itself when all is well.",
+        "es": "Solo lo que te necesita en casa: humo, una fuga o la alarma en rojo (y se queda con su tesela hasta que paren), luego puertas y ventanas abiertas, cerraduras sin cerrar, baterías bajas y problemas. Se oculta cuando todo va bien."
+      },
+      "icon": "shield-alert",
+      "category": "info",
+      "tags": [
+        "home assistant",
+        "smart home",
+        "alerts"
+      ],
+      "size": {
+        "min": {
+          "w": 220,
+          "h": 90
+        },
+        "preferred": {
+          "w": 480,
+          "h": 220
+        }
+      },
+      "chrome": "card",
+      "sources": [
+        "homeassistant/states"
+      ],
+      "options": {
+        "default": {
+          "rows": 0,
+          "layout": "auto",
+          "entities": [],
+          "includeOpenings": true,
+          "openMs": 0,
+          "includeBatteries": true,
+          "includeProblems": true,
+          "includeUnavailable": false,
+          "includeUpdates": false,
+          "batteryWarn": 20,
+          "batteryAlert": 10
+        },
+        "x-ui": {},
+        "type": "object",
+        "properties": {
+          "rows": {
+            "title": "Rows",
+            "description": "0 = as many as fit. A number shows that many, in rows of a readable size (fewer when the tile is too small for them); the rest are counted in \"+N more\".",
+            "default": 0,
+            "x-ui": {
+              "label": {
+                "en": "Rows",
+                "es": "Filas"
+              },
+              "help": {
+                "en": "0 = as many as fit. A number shows that many, in rows of a readable size (fewer when the tile is too small for them); the rest are counted in \"+N more\".",
+                "es": "0 = las que quepan. Con un número se ven esas, en filas de un tamaño legible (menos si la tesela no da para ellas); el resto se cuenta en «+N más»."
+              }
+            },
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 30
+          },
+          "layout": {
+            "title": "Row layout",
+            "description": "Automatic: the widget picks by the tile's shape.",
+            "default": "auto",
+            "x-ui": {
+              "label": {
+                "en": "Row layout",
+                "es": "Formato de fila"
+              },
+              "help": {
+                "en": "Automatic: the widget picks by the tile's shape.",
+                "es": "Automático: el widget elige según la forma de la tesela."
+              },
+              "labels": {
+                "auto": {
+                  "en": "Automatic",
+                  "es": "Automático"
+                },
+                "one-line": {
+                  "en": "One line",
+                  "es": "Una línea"
+                },
+                "detailed": {
+                  "en": "Detailed",
+                  "es": "Detallado"
+                }
+              }
+            },
+            "type": "string",
+            "enum": [
+              "auto",
+              "one-line",
+              "detailed"
+            ]
+          },
+          "entities": {
+            "title": "Entities",
+            "description": "Empty = all. Leave out the ones that are fine open with !: !binary_sensor.patio_door.",
+            "default": [],
+            "x-ui": {
+              "label": {
+                "en": "Entities",
+                "es": "Entidades"
+              },
+              "help": {
+                "en": "Empty = all. Leave out the ones that are fine open with !: !binary_sensor.patio_door.",
+                "es": "Vacío = todas. Deja fuera con ! las que pueden estar abiertas: !binary_sensor.patio_door."
+              },
+              "widget": "filter",
+              "choices": {
+                "source": "homeassistant/states",
+                "list": "entities"
+              }
+            },
+            "type": "array",
+            "items": {
+              "default": "",
+              "x-ui": {
+                "placeholder": "name, group/*, !old-*",
+                "choices": {
+                  "source": "homeassistant/states",
+                  "list": "entities"
+                }
+              },
+              "type": "string"
+            },
+            "x-filter": true
+          },
+          "includeOpenings": {
+            "title": "Doors, windows and locks",
+            "description": "Open doors, windows, garage doors and gates; unlocked locks.",
+            "default": true,
+            "x-ui": {
+              "label": {
+                "en": "Doors, windows and locks",
+                "es": "Puertas, ventanas y cerraduras"
+              },
+              "help": {
+                "en": "Open doors, windows, garage doors and gates; unlocked locks.",
+                "es": "Puertas, ventanas, garajes y cancelas abiertas; cerraduras sin cerrar."
+              }
+            },
+            "type": "boolean"
+          },
+          "openMs": {
+            "title": "Open for at least",
+            "description": "A door counts once it has been open this long. 0 = at once.",
+            "default": 0,
+            "x-ui": {
+              "label": {
+                "en": "Open for at least",
+                "es": "Abierta al menos"
+              },
+              "help": {
+                "en": "A door counts once it has been open this long. 0 = at once.",
+                "es": "Una puerta cuenta cuando lleva abierta este tiempo. 0 = al momento."
+              },
+              "unit": "ms"
+            },
+            "type": "integer",
+            "minimum": 0
+          },
+          "includeBatteries": {
+            "title": "Low batteries",
+            "default": true,
+            "x-ui": {
+              "label": {
+                "en": "Low batteries",
+                "es": "Baterías bajas"
+              }
+            },
+            "type": "boolean"
+          },
+          "includeProblems": {
+            "title": "Problems",
+            "description": "Problem and tamper sensors, lost connections, a vacuum in error.",
+            "default": true,
+            "x-ui": {
+              "label": {
+                "en": "Problems",
+                "es": "Problemas"
+              },
+              "help": {
+                "en": "Problem and tamper sensors, lost connections, a vacuum in error.",
+                "es": "Sensores de problema y manipulación, conexiones perdidas, un robot aspirador en error."
+              }
+            },
+            "type": "boolean"
+          },
+          "includeUnavailable": {
+            "title": "Unavailable devices",
+            "default": false,
+            "x-ui": {
+              "label": {
+                "en": "Unavailable devices",
+                "es": "Dispositivos no disponibles"
+              }
+            },
+            "type": "boolean"
+          },
+          "includeUpdates": {
+            "title": "Updates available",
+            "default": false,
+            "x-ui": {
+              "label": {
+                "en": "Updates available",
+                "es": "Actualizaciones disponibles"
+              }
+            },
+            "type": "boolean"
+          },
+          "batteryWarn": {
+            "title": "Battery warning at",
+            "default": 20,
+            "x-ui": {
+              "label": {
+                "en": "Battery warning at",
+                "es": "Batería en aviso desde"
+              },
+              "advanced": true,
+              "unit": "%"
+            },
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 100
+          },
+          "batteryAlert": {
+            "title": "Battery alert at",
+            "default": 10,
+            "x-ui": {
+              "label": {
+                "en": "Battery alert at",
+                "es": "Batería en alerta desde"
+              },
+              "advanced": true,
+              "unit": "%"
+            },
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 100
+          }
+        }
+      },
+      "screenshot": "docs/attention.png",
+      "animated": false,
+      "urgent": true
+    }
+  ],
+  "sources": [
+    {
+      "type": "homeassistant/states",
+      "name": {
+        "en": "Home Assistant",
+        "es": "Home Assistant"
+      },
+      "description": {
+        "en": "The states of your Home Assistant entities, live over its WebSocket API (a change shows at once), and the last day of the numeric sensors for the history bars.",
+        "es": "Los estados de las entidades de tu Home Assistant, en directo por su API WebSocket (un cambio se ve al momento), y el último día de los sensores numéricos para las barras de histórico."
+      },
+      "polled": false,
+      "options": {
+        "default": {
+          "url": "",
+          "token": "",
+          "entities": [],
+          "history": [],
+          "maxHistory": 100
+        },
+        "x-ui": {},
+        "type": "object",
+        "properties": {
+          "url": {
+            "title": "Home Assistant address",
+            "description": "The one you open in the browser, e.g. http://homeassistant.local:8123 or https://home.example.com.",
+            "default": "",
+            "x-ui": {
+              "label": {
+                "en": "Home Assistant address",
+                "es": "Dirección de Home Assistant"
+              },
+              "help": {
+                "en": "The one you open in the browser, e.g. http://homeassistant.local:8123 or https://home.example.com.",
+                "es": "La que abres en el navegador, p. ej. http://homeassistant.local:8123 o https://casa.example.com."
+              },
+              "placeholder": "http://homeassistant.local:8123",
+              "format": "url"
+            },
+            "x-risk": "network",
+            "type": "string"
+          },
+          "token": {
+            "title": "Long-lived access token",
+            "description": "In Home Assistant: your profile → Security → Long-lived access tokens → Create token. A user that is not an administrator is enough. Secret: leave it empty (or a placeholder such as \"<token>\"). Kiosko keeps the value it already has, or asks for it in the editor.",
+            "default": "",
+            "x-ui": {
+              "label": {
+                "en": "Long-lived access token",
+                "es": "Token de acceso de larga duración"
+              },
+              "help": {
+                "en": "In Home Assistant: your profile → Security → Long-lived access tokens → Create token. A user that is not an administrator is enough.",
+                "es": "En Home Assistant: tu perfil → Seguridad → Tokens de acceso de larga duración → Crear token. Basta un usuario que no sea administrador."
+              },
+              "secret": true
+            },
+            "x-secret": true,
+            "type": "string"
+          },
+          "entities": {
+            "title": "Entities to read",
+            "description": "Empty = all. Ids or names, with * and !: sensor.*, binary_sensor.*, lock.*, !sensor.*_linkquality.",
+            "default": [],
+            "x-ui": {
+              "label": {
+                "en": "Entities to read",
+                "es": "Entidades que leer"
+              },
+              "help": {
+                "en": "Empty = all. Ids or names, with * and !: sensor.*, binary_sensor.*, lock.*, !sensor.*_linkquality.",
+                "es": "Vacío = todas. Ids o nombres, con * y !: sensor.*, binary_sensor.*, lock.*, !sensor.*_linkquality."
+              },
+              "widget": "filter"
+            },
+            "type": "array",
+            "items": {
+              "default": "",
+              "x-ui": {
+                "placeholder": "name, group/*, !old-*"
+              },
+              "type": "string"
+            },
+            "x-filter": true
+          },
+          "history": {
+            "title": "Entities with history",
+            "description": "Numeric sensors whose last day is kept for the history bars. Empty = every one with a unit.",
+            "default": [],
+            "x-ui": {
+              "label": {
+                "en": "Entities with history",
+                "es": "Entidades con histórico"
+              },
+              "help": {
+                "en": "Numeric sensors whose last day is kept for the history bars. Empty = every one with a unit.",
+                "es": "Sensores numéricos de los que se guarda el último día para las barras de histórico. Vacío = todos los que tienen unidad."
+              },
+              "advanced": true,
+              "widget": "filter"
+            },
+            "type": "array",
+            "items": {
+              "default": "",
+              "x-ui": {
+                "placeholder": "name, group/*, !old-*"
+              },
+              "type": "string"
+            },
+            "x-filter": true
+          },
+          "maxHistory": {
+            "title": "Most entities with history",
+            "description": "Each costs a day of five-minute averages in memory (about 300 numbers). 0 = no history.",
+            "default": 100,
+            "x-ui": {
+              "label": {
+                "en": "Most entities with history",
+                "es": "Máximo de entidades con histórico"
+              },
+              "help": {
+                "en": "Each costs a day of five-minute averages in memory (about 300 numbers). 0 = no history.",
+                "es": "Cada una ocupa un día de medias de cinco minutos en memoria (unos 300 números). 0 = sin histórico."
+              },
+              "advanced": true
+            },
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 1000
+          }
+        }
+      }
+    }
+  ],
+  "interludes": [],
+  "templates": []
+}

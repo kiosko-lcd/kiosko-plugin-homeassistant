@@ -21,6 +21,10 @@ npm install --prefix ~/.config/kiosko/plugins kiosko-plugin-homeassistant
 - Home Assistant reachable from this machine, and a long-lived access token: in Home Assistant, your profile → *Security* → *Long-lived access tokens* → *Create token*. A user that is not an administrator is enough.
 - Node 22 or newer (its built-in WebSocket); no other dependency.
 
+## What it does on your machine
+
+- **Internet**: contacts the ones you set in its options.
+
 ## Widgets
 
 ### Entity — `homeassistant/entity`

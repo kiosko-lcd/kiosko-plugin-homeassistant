@@ -82,7 +82,8 @@ const headerSize = (box: Box) => Math.max(11, Math.min(18, Math.round(Math.min(b
 function drawHeader(g: Graphics, ctx: Ctx, e: Entity, box: Box, size: number, color: string): number {
   if (!ctx.options.showName) return 0;
   const icon = size * 1.3;
-  drawEntityIcon(g, e, box.x, box.y + (size * 1.25 - icon) / 2 - size * 0.12, icon, color);
+  // Never above the box: the stroke of the icon's top would spill out.
+  drawEntityIcon(g, e, box.x, box.y + Math.max(1, (size * 1.25 - icon) / 2 - size * 0.12), icon, color);
   drawLabel(g, ctx, ctx.options.name || e.name, box.x + icon + size * 0.5, box.y + size * 0.95, size, box.w - icon - size * 0.5);
   return size * 1.25;
 }
@@ -142,8 +143,9 @@ function renderNumber(g: Graphics, ctx: Ctx, e: Entity, data: HaData, box: Box):
   const room = col.w - (besideTrend ? trendW + ts * 1.2 : 0);
   // As big as fits, but no more than a third of the tile: on a large tile a huge number shouts.
   const vs = fit(g, ctx, isTemperature(unit) ? `${num}°` : num, fonts.sansBold, Math.min(avail * 0.98, box.h * (hasChart && !wide ? 0.3 : 0.5), 150), room, (s) => (unit && !isTemperature(unit) ? s * 0.1 + kit.measureTracked(g, unit, { size: Math.round(s * 0.36), family: fonts.sans }) : 0));
-  // Cap height ≈ 0.72 of the size: sit the digits in the middle of their space.
-  const base = Math.round(valueTop + (avail + vs * 0.72) / 2);
+  // Cap height ≈ 0.72 of the size: sit the digits in the middle of their space,
+  // leaving room under the baseline for a decimal comma.
+  const base = Math.round(Math.min(valueTop + (avail + vs * 0.72) / 2, box.y + box.h - (chartH ? chartH : 0) - vs * 0.2));
   const vw = drawValue(g, ctx, num, unit, col.x, base, vs, loud ? tone : colors.ink);
   if (trend) {
     const tx = besideTrend ? col.x + col.w - trendW : col.x;
@@ -173,7 +175,13 @@ function renderNumber(g: Graphics, ctx: Ctx, e: Entity, data: HaData, box: Box):
   }
   kit.drawTracked(g, hiT, box.x + box.w, Y(Math.max(...f)) + ls * 0.36, lo);
   kit.drawTracked(g, loT, box.x + box.w, Y(Math.min(...f)) + ls * 0.36, lo);
+  // The dot at "now" has a halo: keep it (and the line's width) inside the widget's box.
+  g.save();
+  g.beginPath();
+  g.rect(box.x, box.y, box.w, box.h);
+  g.clip();
   drawCurve(g, area, values, scale, { color: tone, bg: colors.surface });
+  g.restore();
 }
 
 function renderState(g: Graphics, ctx: Ctx, e: Entity, box: Box): void {
