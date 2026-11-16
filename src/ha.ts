@@ -108,12 +108,24 @@ export function numericState(e: Pick<Entity, 'state'>): number | undefined {
   return Number.isFinite(n) ? n : undefined;
 }
 
-/** Decimals as Home Assistant's own cards would show them: fewer as the number grows. `decimals` ≥ 0 forces them. */
-export function formatNumber(n: number, locale: string, decimals = -1): string {
+/** How many decimals a number of this size deserves: fewer as it grows. */
+export const autoDecimals = (n: number) => {
   const a = Math.abs(n);
-  const max = decimals >= 0 ? decimals : a >= 100 ? 0 : a >= 10 ? 1 : 2;
+  return a >= 100 ? 0 : a >= 10 ? 1 : 2;
+};
+
+/**
+ * Decimals as Home Assistant's own cards would show them: fewer as the
+ * number grows. `decimals` ≥ 0 forces them. `like` sizes the automatic
+ * decimals after another number (a minimum next to its value).
+ */
+export function formatNumber(n: number, locale: string, decimals = -1, like = n): string {
+  const max = decimals >= 0 ? decimals : autoDecimals(like);
   return new Intl.NumberFormat(locale, { maximumFractionDigits: max, minimumFractionDigits: decimals >= 0 ? decimals : 0 }).format(n);
 }
+
+/** Temperatures: the degree sign goes with the number (`21,5°`), as on a thermometer. */
+export const isTemperature = (unit: string | undefined) => unit === '°C' || unit === '°F' || unit === '°';
 
 /** `21.5 °C`, `1 534 W`, `68 %` (no space before %, as Home Assistant writes it). */
 export function withUnit(text: string, unit: string | undefined): string {

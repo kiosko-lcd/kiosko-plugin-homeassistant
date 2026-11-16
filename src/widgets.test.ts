@@ -59,21 +59,29 @@ test('connection states say what is going on', () => {
   assert.ok(texts(entities, {}, { ...home(), state: 'offline', since: NOW - 120_000 }).includes('offline since 09:58'));
 });
 
-test('entity: value and unit, min and max of the history, hints when misconfigured', () => {
+test('entity: name, value, the last hour, the highest and lowest of the curve; hints when misconfigured', () => {
   const d = home();
   const temp = d.entities['sensor.living_room_temperature']!;
+  // A temperature: the degree sign goes with the number, the trend says how much it moved in an hour.
   const out = texts(entity, { entity: temp.id }, d, { w: 320, h: 200 });
   assert.equal(out[0], 'Living room temperature');
-  assert.equal(out[1], temp.state);
-  assert.equal(out[2], '°C');
-  assert.match(out[3]!, /^min \d+(\.\d+)? · max \d+(\.\d+)?$/);
-  assert.deepEqual(texts(entity, { entity: temp.id, name: 'Salón', showName: true, showHistory: false }, d, { w: 320, h: 200 }).slice(0, 1), ['Salón']);
+  assert.equal(out[1], `${temp.state}°`);
+  assert.match(out[2]!, /^\d+(\.\d)?° · 1 h$/);
+  assert.match(out[3]!, /^\d+(\.\d)?°$/);
+  assert.ok(Number.parseFloat(out[3]!) > Number.parseFloat(out[4]!));
+  // Other units go apart, smaller.
+  assert.deepEqual(texts(entity, { entity: 'sensor.house_power' }, d, { w: 320, h: 200 }).slice(0, 3), ['House power', '580', 'W']);
+  assert.deepEqual(texts(entity, { entity: temp.id, name: 'Salón', showHistory: false }, d, { w: 320, h: 200 }).slice(0, 1), ['Salón']);
+  assert.deepEqual(texts(entity, { entity: temp.id, showName: false, showHistory: false }, d, { w: 320, h: 200 }), [`${temp.state}°`]);
   assert.deepEqual(texts(entity, { entity: '' }, d)[0], 'Choose an entity');
   assert.deepEqual(texts(entity, { entity: 'sensor.nope' }, d), ['Entity not found', 'sensor.nope']);
   // A door: its word, and how long it has been so.
-  assert.deepEqual(texts(entity, { entity: 'binary_sensor.balcony_door', showName: false }, d, { w: 320, h: 200 }), ['Open', '42 min ago']);
-  // The thermostat: room temperature, then target and action.
-  assert.deepEqual(texts(entity, { entity: 'climate.living_room', showName: false }, d, { w: 320, h: 200 }), ['21.4', '°C', '→ 22 °C · heating']);
+  assert.deepEqual(texts(entity, { entity: 'binary_sensor.balcony_door' }, d, { w: 320, h: 200 }), ['Balcony door', 'Open', '42 min ago']);
+  assert.deepEqual(texts(entity, { entity: 'binary_sensor.balcony_door' }, d, { w: 320, h: 200 }, 'es').slice(1), ['Abierta', 'hace 42 min']);
+  // The thermostat: the room in big, what it is doing, the target in the dial…
+  assert.deepEqual(texts(entity, { entity: 'climate.living_room' }, d, { w: 320, h: 200 }), ['Thermostat', '21.4°', 'Heating', '22°']);
+  // …or after the action, when there is no room for a dial.
+  assert.deepEqual(texts(entity, { entity: 'climate.living_room' }, d, { w: 160, h: 200 }), ['Thermostat', '21.4°', 'Heating', ' · to 22°']);
 });
 
 test('entity thresholds colour, and only red takes the tile', () => {
@@ -108,12 +116,12 @@ test('entities: in the order of the patterns, states in words, hideOff', () => {
 test('attention: what needs you, red takes the tile, idle and empty when all is well', () => {
   const d = home();
   const out = texts(attention, { layout: 'one-line' }, d);
-  assert.deepEqual(out, ['Battery 8 %', 'Hallway sensor battery', 'Open', 'Balcony door']);
+  assert.deepEqual(out, ['1 d', 'Battery 8 %', 'Hallway sensor battery', '42 min', 'Open', 'Balcony door']);
   assert.equal(state(attention, 'urgent', {}, d), false); // a battery doesn't take the tile
   const leak = structuredClone({ ...d, history: undefined });
   leak.entities['binary_sensor.washing_machine_leak']!.state = 'on';
   assert.equal(state(attention, 'urgent', {}, leak), true);
-  assert.equal(texts(attention, { layout: 'one-line' }, leak)[1], 'Washing machine leak');
+  assert.equal(texts(attention, { layout: 'one-line' }, leak)[2], 'Washing machine leak');
   const calm = { ...d, entities: Object.fromEntries(Object.entries(d.entities).filter(([id]) => !['binary_sensor.balcony_door', 'sensor.hallway_motion_battery'].includes(id))) };
   assert.equal(state(attention, 'empty', {}, calm), true);
   assert.equal(state(attention, 'idle', {}, calm), true);

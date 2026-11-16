@@ -5,15 +5,19 @@
  */
 import { defineSource, definePlugin, defineWidget, drawEmpty, listLayout, listOptions, t, type Box, type Graphics, type RenderContext } from '@kiosko/sdk';
 import { connect } from './connection.ts';
-import { drawBars, drawMessage, drawRows, type Row } from './draw.ts';
+import { renderEntity, stateColor, thresholdLevel } from './card.ts';
+import { drawMessage, drawRows, type Row } from './draw.ts';
 import {
-  demoHome, formatNumber, levelColor, levelOf, notices, numericState, pick, stateText, withUnit,
+  demoHome, formatNumber, isTemperature, levelOf, notices, numericState, pick, stateText,
   type Entity, type HaData, type Level, type LevelOptions,
 } from './ha.ts';
+import { batteryLevel, iconFor } from './icons.ts';
 
 export * from './ha.ts';
 export * from './connection.ts';
 export * from './draw.ts';
+export * from './icons.ts';
+export * from './card.ts';
 
 const SOURCE = 'homeassistant/states';
 
@@ -99,24 +103,7 @@ const batteryFields = () => ({
   batteryAlert: t.integer({ default: 10, min: 0, max: 100, unit: '%', advanced: true, label: { en: 'Battery alert at', es: 'Batería en alerta desde' } }),
 });
 
-/** The colour of a value: loud only when it asks for the user. */
-function valueColor(level: Level, e: Entity, colors: RenderContext<unknown, unknown>['theme']['colors']): string {
-  if (level === 'alert') return colors.alert;
-  if (level === 'warn') return colors.warn;
-  if (level === 'na') return colors.inkFaint;
-  return level === 'on' || numericState(e) !== undefined ? colors.ink : colors.inkDim;
-}
-
 /* ---------- one entity ---------- */
-
-/** The level a number reaches against the widget's thresholds, or the entity's own level. */
-export function thresholdLevel(e: Entity, o: { thresholds: 'off' | 'above' | 'below'; warn: number; alert: number }, levels?: LevelOptions): Level {
-  const own = levelOf(e, levels);
-  const n = e.domain === 'climate' ? e.current : numericState(e);
-  if (o.thresholds === 'off' || n === undefined || own === 'na') return own;
-  const past = (lim: number) => (o.thresholds === 'above' ? n >= lim : n <= lim);
-  return past(o.alert) ? 'alert' : past(o.warn) ? 'warn' : own;
-}
 
 export const entity = defineWidget({
   id: 'entity',
@@ -155,69 +142,13 @@ export const entity = defineWidget({
     return !!e && dataOf(sources)?.state === 'ok' && thresholdLevel(e, options) === 'alert';
   },
   render(g, ctx) {
-    const { options, sources, theme, kit, fmt, locale, now, t: tr } = ctx;
+    const { options, sources, t: tr } = ctx;
     const data = dataOf(sources);
     const box = frame(g, ctx.box, ctx, data);
     if (!box || !data) return;
-    const { colors, fonts } = theme;
     if (!options.entity) return drawMessage(g, box, ctx, tr({ en: 'Choose an entity', es: 'Elige una entidad' }), tr({ en: 'Its id in the inspector, e.g. sensor.living_room_temperature', es: 'Su id en el inspector, p. ej. sensor.living_room_temperature' }));
-    const e = data.entities[options.entity];
-    if (!e) return drawMessage(g, box, ctx, tr({ en: 'Entity not found', es: 'Entidad no encontrada' }), options.entity);
-
-    const level = thresholdLevel(e, options);
-    const n = e.domain === 'climate' ? e.current : numericState(e);
-    const numeric = n !== undefined && e.domain !== 'binary_sensor';
-    const color = level === 'alert' ? colors.alert : level === 'warn' ? colors.warn : level === 'na' ? colors.inkFaint : colors.ink;
-
-    // The history, below, when there is room and something to draw.
-    const span = options.historyMs;
-    const bars = Math.max(12, Math.min(96, Math.floor(box.w / 6)));
-    const values = numeric && options.showHistory && data.history?.has(e.id) && box.h >= 90 ? data.history.values(e.id, now, span, bars) : [];
-    const hasBars = values.filter((v) => Number.isFinite(v)).length >= 2;
-    const barsH = hasBars ? Math.round(box.h * 0.3) : 0;
-    let y = box.y;
-    let h = box.h - (hasBars ? barsH + Math.max(4, box.h * 0.05) : 0);
-
-    if (options.showName) {
-      const ns = Math.max(10, Math.round(Math.min(26, h * 0.17)));
-      const no = { size: ns, family: fonts.sans, color: colors.inkDim };
-      kit.drawTracked(g, kit.truncate(g, options.name || e.name, box.w, no), box.x, y + ns, no);
-      y += ns * 1.35;
-      h -= ns * 1.35;
-    }
-
-    // What goes under the value: the thermostat's target and action, or how long a state has held.
-    let sub = '';
-    if (e.domain === 'climate') {
-      const parts = [e.target !== undefined ? `→ ${withUnit(formatNumber(e.target, locale, options.decimals), e.unit ?? '°')}` : '', e.action && e.action !== 'idle' && e.action !== 'off' ? tr({ heating: { en: 'heating', es: 'calentando' }, cooling: { en: 'cooling', es: 'enfriando' } }[e.action] ?? { en: e.action }) : stateText({ ...e, current: undefined }, ctx)];
-      sub = parts.filter(Boolean).join(' · ');
-    } else if (!numeric && e.changedAt) sub = fmt.ago(e.changedAt);
-    else if (hasBars) {
-      const f = values.filter((v) => Number.isFinite(v));
-      sub = `${tr({ en: 'min', es: 'mín' })} ${formatNumber(Math.min(...f), locale, options.decimals)} · ${tr({ en: 'max', es: 'máx' })} ${formatNumber(Math.max(...f), locale, options.decimals)}`;
-    }
-    const ss = sub ? Math.max(9, Math.round(Math.min(22, h * 0.16))) : 0;
-    const valueH = h - (sub ? ss * 1.5 : 0);
-
-    // The value, as big as fits: the number and its unit (smaller), or the state's word.
-    const big = numeric ? formatNumber(n!, locale, options.decimals) : stateText(e, ctx, options.decimals);
-    const unit = numeric ? (e.unit ?? (e.domain === 'climate' ? '°' : '')) : '';
-    const fam = fonts.sansBold;
-    const unitRatio = 0.42;
-    const widthAt = (s: number) => kit.measureTracked(g, big, { size: s, family: fam }) + (unit ? s * 0.12 + kit.measureTracked(g, unit, { size: s * unitRatio, family: fonts.sans }) : 0);
-    let vs = Math.max(10, Math.round(valueH * 0.8));
-    const w0 = widthAt(vs);
-    if (w0 > box.w) vs = Math.max(10, Math.floor((vs * box.w) / w0));
-    while (vs > 10 && widthAt(vs) > box.w) vs--;
-    const base = y + Math.min(valueH, valueH / 2 + vs * 0.36);
-    const vw = kit.drawTracked(g, kit.truncate(g, big, box.w, { size: vs, family: fam }), box.x, base, { size: vs, family: fam, color });
-    if (unit) kit.drawTracked(g, unit, box.x + vw + vs * 0.12, base, { size: Math.round(vs * unitRatio), family: fonts.sans, color: colors.inkDim });
-
-    if (sub) {
-      const so = { size: ss, family: fonts.sans, color: e.domain === 'climate' && e.action === 'heating' ? colors.warn : colors.inkDim };
-      kit.drawTracked(g, kit.truncate(g, sub, box.w, so), box.x, y + valueH + ss * 1.2, so);
-    }
-    if (hasBars) drawBars(g, { x: box.x, y: box.y + box.h - barsH, w: box.w, h: barsH }, values, { color: colors.inkFaint, strong: level === 'alert' || level === 'warn' ? color : colors.accent });
+    if (!data.entities[options.entity]) return drawMessage(g, box, ctx, tr({ en: 'Entity not found', es: 'Entidad no encontrada' }), options.entity);
+    renderEntity(g, ctx, data, box);
   },
   demo: ({ now, locale }) => ({ ...demo({ now, locale }), options: { entity: 'sensor.living_room_temperature' } }),
 });
@@ -260,22 +191,38 @@ export const entities = defineWidget({
     const list = listed(data, options);
     if (!list.length) return drawEmpty(g, { ...ctx, box }, tr({ en: 'No entities match', es: 'Ninguna entidad coincide' }));
     const plan = listLayout(box, list.length, options, {
-      sizes: { 'one-line': { min: 22, max: Math.max(22, Math.min(46, box.w / 10)) }, detailed: { min: 40, max: Math.max(40, Math.min(80, box.w / 5)) } },
-      auto: (b, n) => (b.h / Math.max(1, n) >= 50 && b.h >= b.w * 0.6 ? 'detailed' : 'one-line'),
+      sizes: { 'one-line': { min: 22, max: Math.max(22, Math.min(40, box.w / 11)) }, detailed: { min: 42, max: Math.max(42, Math.min(66, box.w / 6)) } },
+      auto: (b, n) => (b.h / Math.max(1, n) >= 52 && b.h >= b.w * 0.6 ? 'detailed' : 'one-line'),
       minRows: 3,
     });
-    const { colors } = theme;
-    drawRows(g, { ...ctx, box }, plan, list.map(({ e, level }): Row => ({
-      dot: levelColor(level, colors),
-      title: e.name,
-      strong: level !== 'off' && level !== 'na',
-      value: stateText(e, ctx, options.decimals),
-      valueColor: valueColor(level, e, colors),
-      ...(e.changedAt ? { meta: ` · ${fmt.ago(e.changedAt, { suffix: false })}` } : {}),
-    })));
+    drawRows(g, { ...ctx, box }, plan, list.map(({ e, level }) => entityRow(e, level, ctx, options.decimals)));
   },
   demo: ({ now, locale }) => ({ ...demo({ now, locale }), options: { entities: ['sensor.*_temperature', 'binary_sensor.*door*', 'lock.*', 'light.*'] } }),
 });
+
+/** One entity as a list row: its icon, its name, and its value with the unit apart. */
+function entityRow(e: Entity, level: Level, ctx: RenderContext<unknown, unknown>, decimals: number): Row {
+  const { theme, locale, fmt } = ctx;
+  const { colors } = theme;
+  const n = e.domain === 'climate' ? e.current : e.domain === 'binary_sensor' ? undefined : numericState(e);
+  const heating = e.domain === 'climate' && e.action === 'heating';
+  const color = heating ? colors.warn : stateColor(level, colors);
+  const battery = batteryLevel(e);
+  const loud = level === 'alert' || level === 'warn';
+  const value = n === undefined ? stateText(e, ctx, decimals) : `${formatNumber(n, locale, decimals)}${isTemperature(e.unit) || e.domain === 'climate' ? '°' : ''}`;
+  const unit = n !== undefined && e.unit && !isTemperature(e.unit) && e.domain !== 'climate' ? e.unit : undefined;
+  return {
+    icon: iconFor(e),
+    ...(battery !== undefined ? { battery } : {}),
+    color: n !== undefined && !loud && !heating ? colors.inkDim : color,
+    title: e.name,
+    strong: level !== 'off' && level !== 'na' || n !== undefined,
+    value: e.domain === 'climate' && e.target !== undefined && e.state !== 'off' ? `${value} → ${formatNumber(e.target, locale, decimals)}°` : value,
+    ...(unit ? { unit } : {}),
+    valueColor: loud || heating ? color : level === 'na' ? colors.inkFaint : n !== undefined || level === 'on' ? colors.ink : colors.inkDim,
+    ...(e.changedAt ? { meta: ` · ${fmt.ago(e.changedAt, { suffix: false })}` } : {}),
+  };
+}
 
 function listed(data: HaData, o: { entities: string[] | string; hideOff: boolean; hideUnavailable: boolean } & LevelOptions): { e: Entity; level: Level }[] {
   return pick(data.entities, o.entities)
@@ -330,22 +277,26 @@ export const attention = defineWidget({
     const list = notices(data.entities, options, now);
     if (!list.length) return drawEmpty(g, { ...ctx, box }, tr({ en: 'All well at home', es: 'Todo en orden en casa' }));
     const plan = listLayout(box, list.length, options, {
-      sizes: { 'one-line': { min: 22, max: Math.max(22, Math.min(46, box.w / 10)) }, detailed: { min: 40, max: Math.max(40, Math.min(80, box.w / 5)) } },
+      sizes: { 'one-line': { min: 24, max: Math.max(24, Math.min(40, box.w / 11)) }, detailed: { min: 44, max: Math.max(44, Math.min(64, box.w / 6)) } },
       auto: (b, n) => (b.h / Math.max(1, n) >= 50 ? 'detailed' : 'one-line'),
-      minRows: 2,
+      minRows: 3,
     });
     const { colors } = theme;
     drawRows(g, { ...ctx, box }, plan, list.map((n): Row => {
-      const color = levelColor(n.level, colors);
+      const color = stateColor(n.level, colors);
+      const battery = batteryLevel(n.entity);
       return {
-        dot: color,
+        icon: iconFor(n.entity),
+        ...(battery !== undefined ? { battery } : {}),
+        color,
         title: n.entity.name,
         strong: n.level === 'alert' || n.level === 'warn',
         value: tr(n.what),
         valueColor: n.level === 'na' ? colors.inkDim : color,
         ...(n.entity.changedAt ? { meta: ` · ${fmt.ago(n.entity.changedAt, { suffix: false })}` } : {}),
+        ...(n.kind === 'danger' ? { highlight: colors.alert } : {}),
       };
-    }));
+    }), { badges: true, metaRight: true });
   },
   demo,
 });
