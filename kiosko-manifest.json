@@ -6,10 +6,10 @@
     "en": "Home Assistant",
     "es": "Home Assistant"
   },
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": {
-    "en": "Home Assistant on the panel, live over its WebSocket API: any entity in big with its history, lists of entities, and what needs you at home (doors left open, low batteries, leaks, the alarm).",
-    "es": "Home Assistant en el panel, en directo por su API WebSocket: cualquier entidad en grande con su histórico, listas de entidades y lo que te necesita en casa (puertas abiertas, baterías bajas, fugas, la alarma)."
+    "en": "Home Assistant on the panel, live over its WebSocket API: any entity in big with its history, lists of entities, what needs you at home (doors left open, low batteries, leaks, the alarm) and your cameras' latest pictures.",
+    "es": "Home Assistant en el panel, en directo por su API WebSocket: cualquier entidad en grande con su histórico, listas de entidades, lo que te necesita en casa (puertas abiertas, baterías bajas, fugas, la alarma) y la última imagen de tus cámaras."
   },
   "author": "Loksly",
   "license": "MIT",
@@ -27,13 +27,17 @@
     "es"
   ],
   "categories": [
-    "info"
+    "info",
+    "media"
   ],
   "tags": [
     "home assistant",
     "smart home",
     "sensor",
-    "alerts"
+    "alerts",
+    "camera",
+    "blink",
+    "security"
   ],
   "permissions": {
     "network": [
@@ -729,6 +733,226 @@
         }
       },
       "screenshot": "docs/attention.png",
+      "animated": false,
+      "urgent": true
+    },
+    {
+      "type": "homeassistant/camera",
+      "name": {
+        "en": "Camera",
+        "es": "Cámara"
+      },
+      "description": {
+        "en": "The latest picture of a Home Assistant camera (Blink, Reolink, ONVIF…), refreshed every minute, with how old it is; with a motion sensor, a red mark while it sees someone, and it can take over its tile. A still, not live video.",
+        "es": "La última imagen de una cámara de Home Assistant (Blink, Reolink, ONVIF…), refrescada cada minuto, con su antigüedad; con un sensor de movimiento, una marca roja mientras ve a alguien, y puede quedarse con su tesela. Una foto, no vídeo en directo."
+      },
+      "icon": "cctv",
+      "category": "media",
+      "tags": [
+        "home assistant",
+        "camera",
+        "blink",
+        "security"
+      ],
+      "size": {
+        "min": {
+          "w": 120,
+          "h": 80
+        },
+        "preferred": {
+          "w": 400,
+          "h": 260
+        }
+      },
+      "chrome": "bare",
+      "sources": [
+        "homeassistant/states"
+      ],
+      "options": {
+        "default": {
+          "entity": "",
+          "name": "",
+          "showName": true,
+          "showAge": true,
+          "motion": "",
+          "fit": "cover",
+          "keep": "center",
+          "dim": 0
+        },
+        "x-ui": {},
+        "type": "object",
+        "properties": {
+          "entity": {
+            "title": "Camera",
+            "description": "Its id in Home Assistant: camera.something.",
+            "default": "",
+            "x-ui": {
+              "label": {
+                "en": "Camera",
+                "es": "Cámara"
+              },
+              "help": {
+                "en": "Its id in Home Assistant: camera.something.",
+                "es": "Su id en Home Assistant: camera.algo."
+              },
+              "placeholder": "camera.porch",
+              "choices": {
+                "source": "homeassistant/states",
+                "list": "cameras"
+              }
+            },
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "description": "Empty = the name in Home Assistant.",
+            "default": "",
+            "x-ui": {
+              "label": {
+                "en": "Name",
+                "es": "Nombre"
+              },
+              "help": {
+                "en": "Empty = the name in Home Assistant.",
+                "es": "Vacío = el nombre en Home Assistant."
+              }
+            },
+            "type": "string"
+          },
+          "showName": {
+            "title": "Show the name",
+            "default": true,
+            "x-ui": {
+              "label": {
+                "en": "Show the name",
+                "es": "Mostrar el nombre"
+              }
+            },
+            "type": "boolean"
+          },
+          "showAge": {
+            "title": "Show how old the picture is",
+            "description": "Since the picture last changed. A battery camera (Blink) only takes a new one on motion or when asked.",
+            "default": true,
+            "x-ui": {
+              "label": {
+                "en": "Show how old the picture is",
+                "es": "Mostrar la antigüedad de la imagen"
+              },
+              "help": {
+                "en": "Since the picture last changed. A battery camera (Blink) only takes a new one on motion or when asked.",
+                "es": "Desde que cambió la imagen por última vez. Una cámara de batería (Blink) solo hace otra con movimiento o cuando se le pide."
+              }
+            },
+            "type": "boolean"
+          },
+          "motion": {
+            "title": "Motion sensor",
+            "description": "Empty = binary_sensor.<camera>_motion if there is one (Blink names them so).",
+            "default": "",
+            "x-ui": {
+              "label": {
+                "en": "Motion sensor",
+                "es": "Sensor de movimiento"
+              },
+              "help": {
+                "en": "Empty = binary_sensor.<camera>_motion if there is one (Blink names them so).",
+                "es": "Vacío = binary_sensor.<cámara>_motion si existe (Blink los llama así)."
+              },
+              "placeholder": "binary_sensor.porch_motion",
+              "choices": {
+                "source": "homeassistant/states",
+                "list": "motion"
+              }
+            },
+            "type": "string"
+          },
+          "fit": {
+            "title": "Fit",
+            "default": "cover",
+            "x-ui": {
+              "label": {
+                "en": "Fit",
+                "es": "Ajuste"
+              },
+              "labels": {
+                "cover": {
+                  "en": "Fill (crop)",
+                  "es": "Llenar (recorta)"
+                },
+                "contain": {
+                  "en": "Whole picture",
+                  "es": "Imagen entera"
+                }
+              }
+            },
+            "type": "string",
+            "enum": [
+              "cover",
+              "contain"
+            ]
+          },
+          "keep": {
+            "title": "Keep in view",
+            "description": "What filling crops last: the sky or the ground.",
+            "default": "center",
+            "x-ui": {
+              "label": {
+                "en": "Keep in view",
+                "es": "Mantener a la vista"
+              },
+              "help": {
+                "en": "What filling crops last: the sky or the ground.",
+                "es": "Lo último que recorta al llenar: el cielo o el suelo."
+              },
+              "advanced": true,
+              "labels": {
+                "center": {
+                  "en": "The centre",
+                  "es": "El centro"
+                },
+                "top": {
+                  "en": "The top",
+                  "es": "La parte de arriba"
+                },
+                "bottom": {
+                  "en": "The bottom",
+                  "es": "La parte de abajo"
+                }
+              }
+            },
+            "type": "string",
+            "enum": [
+              "center",
+              "top",
+              "bottom"
+            ]
+          },
+          "dim": {
+            "title": "Darken",
+            "description": "Keeps a bright picture from outshining everything else.",
+            "default": 0,
+            "x-ui": {
+              "label": {
+                "en": "Darken",
+                "es": "Oscurecer"
+              },
+              "help": {
+                "en": "Keeps a bright picture from outshining everything else.",
+                "es": "Para que una imagen clara no deslumbre al resto."
+              },
+              "advanced": true,
+              "unit": "%",
+              "step": 5,
+              "slider": true
+            },
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 90
+          }
+        }
+      },
+      "screenshot": "docs/camera.png",
       "animated": false,
       "urgent": true
     }

@@ -1,7 +1,8 @@
 /**
  * Home Assistant on the panel: one shared live connection (WebSocket, no
- * polling) and three cards over it — one entity in big, a list of entities,
- * and what needs you at home (a door left open, a low battery, a leak).
+ * polling) and four cards over it — one entity in big, a list of entities,
+ * what needs you at home (a door left open, a low battery, a leak) and a
+ * camera's latest picture.
  */
 import { defineSource, definePlugin, defineWidget, drawEmpty, listLayout, listOptions, t, type Box, type Graphics, type RenderContext } from '@kiosko/sdk';
 import { connect } from './connection.ts';
@@ -12,12 +13,14 @@ import {
   type Entity, type HaData, type Level, type LevelOptions,
 } from './ha.ts';
 import { batteryLevel, iconFor } from './icons.ts';
+import { camera } from './camera.ts';
 
 export * from './ha.ts';
 export * from './connection.ts';
 export * from './draw.ts';
 export * from './icons.ts';
 export * from './card.ts';
+export * from './camera.ts';
 
 const SOURCE = 'homeassistant/states';
 
@@ -65,6 +68,17 @@ export const states = defineSource({
       Object.values(d?.entities ?? {})
         .sort((a, b) => a.domain.localeCompare(b.domain) || a.name.localeCompare(b.name))
         .map((e) => ({ value: e.id, label: e.name, group: e.domain })),
+    // The cameras, for the camera widget; and the motion sensors to go with them.
+    cameras: (d: HaData) =>
+      Object.values(d?.entities ?? {})
+        .filter((e) => e.picture)
+        .sort((a, b) => a.name.localeCompare(b.name))
+        .map((e) => ({ value: e.id, label: e.name, group: e.domain })),
+    motion: (d: HaData) =>
+      Object.values(d?.entities ?? {})
+        .filter((e) => e.domain === 'binary_sensor' && ['motion', 'occupancy', 'presence'].includes(e.deviceClass ?? ''))
+        .sort((a, b) => a.name.localeCompare(b.name))
+        .map((e) => ({ value: e.id, label: e.name })),
   },
 });
 
@@ -313,14 +327,14 @@ export const attention = defineWidget({
 export default definePlugin({
   id: 'homeassistant',
   name: { en: 'Home Assistant', es: 'Home Assistant' },
-  version: '0.2.1',
+  version: '0.2.2',
   sdk: '^0.2.0',
   permissions: { network: ['user'] },
   description: {
-    en: 'Home Assistant on the panel, live over its WebSocket API: any entity in big with its history, lists of entities, and what needs you at home (doors left open, low batteries, leaks, the alarm).',
-    es: 'Home Assistant en el panel, en directo por su API WebSocket: cualquier entidad en grande con su histórico, listas de entidades y lo que te necesita en casa (puertas abiertas, baterías bajas, fugas, la alarma).',
+    en: 'Home Assistant on the panel, live over its WebSocket API: any entity in big with its history, lists of entities, what needs you at home (doors left open, low batteries, leaks, the alarm) and your cameras\' latest pictures.',
+    es: 'Home Assistant en el panel, en directo por su API WebSocket: cualquier entidad en grande con su histórico, listas de entidades, lo que te necesita en casa (puertas abiertas, baterías bajas, fugas, la alarma) y la última imagen de tus cámaras.',
   },
   icon: 'house',
-  widgets: [entity, entities, attention],
+  widgets: [entity, entities, attention, camera],
   sources: [states],
 });

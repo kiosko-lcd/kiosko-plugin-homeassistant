@@ -11,7 +11,7 @@
  * 5 min before trying again, so a wrong token doesn't flood Home
  * Assistant's log with failed logins (and trip its IP ban).
  */
-import { compact, History, parseHistory, wantsHistory, websocketUrl, type Entity, type HaData, type RawState } from './ha.ts';
+import { compact, History, httpBase, parseHistory, wantsHistory, websocketUrl, type Entity, type HaData, type RawState } from './ha.ts';
 import { matchFilter, type Filter } from '@kiosko/sdk';
 
 /** What the connection needs of a WebSocket: the browser API, which Node ≥ 22 has built in. */
@@ -98,6 +98,7 @@ export function connect(o: ConnectionOptions, emit: (d: HaData) => void, deps: {
     ...(error ? { error } : {}),
     ...(since !== undefined ? { since } : {}),
     ...(version ? { version } : {}),
+    base: httpBase(o.url),
     entities: Object.fromEntries(entities),
     history,
   });

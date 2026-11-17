@@ -30,6 +30,13 @@ export interface Entity {
   action?: string;
   /** A battery level some devices report as an attribute, in %. */
   battery?: number;
+  /**
+   * Cameras and image entities: the path of their picture
+   * (`/api/camera_proxy/camera.porch?token=…`). Its token opens that picture
+   * only and Home Assistant changes it every few minutes, sending the new
+   * path as a state change: the long-lived token never leaves the source.
+   */
+  picture?: string;
 }
 
 /**
@@ -47,6 +54,8 @@ export interface HaData {
   since?: number;
   /** Home Assistant's version, once connected. */
   version?: string;
+  /** Its address for HTTP (`http://homeassistant.local:8123`), where entity pictures are read. */
+  base?: string;
   entities: Record<string, Entity>;
   /** Numeric history. A class instance, so Kiosko compares it by identity and not by content. */
   history?: History;
@@ -88,7 +97,16 @@ export function compact(s: RawState): Entity {
   if (action) e.action = action;
   const battery = num(a.battery_level) ?? num(a.battery);
   if (battery !== undefined) e.battery = battery;
+  const picture = str(a.entity_picture);
+  if (picture && (e.domain === 'camera' || e.domain === 'image')) e.picture = picture;
   return e;
+}
+
+/** `homeassistant.local:8123/` → `http://homeassistant.local:8123`: where its HTTP API is. */
+export function httpBase(address: string): string {
+  let a = address.trim().replace(/\/+$/, '').replace(/\/api\/websocket$/, '');
+  if (!/^[a-z]+:\/\//i.test(a)) a = `http://${a}`;
+  return a.replace(/^ws(s?):\/\//i, (_, s: string) => `http${s}://`);
 }
 
 /** `http://ha.local:8123` → `ws://ha.local:8123/api/websocket`. An address without a scheme is taken as http. */
@@ -568,6 +586,8 @@ export function demoHome(now: number, locale = 'en'): HaData {
     { id: 'binary_sensor.balcony_door', name: n('Balcony door', 'Puerta del balcón'), state: 'on', deviceClass: 'door', changedAt: ago(42 * min) },
     { id: 'binary_sensor.front_door', name: n('Front door', 'Puerta de entrada'), state: 'off', deviceClass: 'door', changedAt: ago(95 * min) },
     { id: 'binary_sensor.kitchen_window', name: n('Kitchen window', 'Ventana cocina'), state: 'off', deviceClass: 'window', changedAt: ago(5 * 3_600_000) },
+    { id: 'camera.porch', name: n('Porch', 'Porche'), state: 'idle', picture: '/api/camera_proxy/camera.porch?token=demo', changedAt: ago(3 * 3_600_000) },
+    { id: 'binary_sensor.porch_motion', name: n('Porch motion', 'Movimiento porche'), state: 'off', deviceClass: 'motion', changedAt: ago(12 * min) },
     { id: 'binary_sensor.hallway_motion', name: n('Hallway motion', 'Movimiento pasillo'), state: 'on', deviceClass: 'motion', changedAt: ago(1 * min) },
     { id: 'binary_sensor.washing_machine_leak', name: n('Washing machine leak', 'Fuga lavadora'), state: 'off', deviceClass: 'moisture', changedAt: ago(26 * 3_600_000) },
     { id: 'lock.front_door', name: n('Front door lock', 'Cerradura entrada'), state: 'locked', changedAt: ago(95 * min) },
@@ -604,5 +624,5 @@ export function demoHome(now: number, locale = 'en'): HaData {
     const e = entities[id]!;
     e.state = String(Math.round(last * (e.unit === 'W' ? 1 : 10)) / (e.unit === 'W' ? 1 : 10));
   }
-  return { state: 'ok', version: '2026.11.1', entities, history };
+  return { state: 'ok', version: '2026.11.1', base: 'http://homeassistant.local:8123', entities, history };
 }

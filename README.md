@@ -1,6 +1,6 @@
 # kiosko-plugin-homeassistant
 
-Home Assistant on the panel, live over its WebSocket API: any entity in big with its history, lists of entities, and what needs you at home (doors left open, low batteries, leaks, the alarm).
+Home Assistant on the panel, live over its WebSocket API: any entity in big with its history, lists of entities, what needs you at home (doors left open, low batteries, leaks, the alarm) and your cameras' latest pictures.
 
 A plugin for [Kiosko](https://github.com/kiosko-lcd/kiosko), the widget mosaic for small USB LCD panels.
 
@@ -87,6 +87,27 @@ Uses: `homeassistant/states`.
 | `includeUpdates` | boolean | `false` | Updates available |
 | `batteryWarn` | number | `20` | Battery warning at |
 | `batteryAlert` | number | `10` | Battery alert at |
+
+### Camera — `homeassistant/camera`
+
+The latest picture of a Home Assistant camera (Blink, Reolink, ONVIF…), refreshed every minute, with how old it is; with a motion sensor, a red mark while it sees someone, and it can take over its tile. A still, not live video.
+
+![Camera](docs/camera.png)
+
+Uses: `homeassistant/states`.
+
+The picture is read from Home Assistant's camera proxy with the camera's own short-lived token (the one in its `entity_picture`, renewed by Home Assistant every few minutes): your long-lived token stays in the source. What the picture is depends on the camera: a fresh still for one that streams; for a battery camera like **Blink**, the last thumbnail it took (on motion, or when asked with Home Assistant's `blink.trigger_camera`), so the age tells how old it is. "Keep the tile while urgent" is off by default: turn it on to have the camera take over its tile while its motion sensor is on.
+
+| Option | Type | Default | |
+|---|---|---|---|
+| `entity` | string | `""` | Camera. Its id in Home Assistant: camera.something. |
+| `name` | string | `""` | Name. Empty = the name in Home Assistant. |
+| `showName` | boolean | `true` | Show the name |
+| `showAge` | boolean | `true` | Show how old the picture is. Since the picture last changed. A battery camera (Blink) only takes a new one on motion or when asked. |
+| `motion` | string | `""` | Motion sensor. Empty = binary_sensor.<camera>_motion if there is one (Blink names them so). |
+| `fit` | `cover` \| `contain` | `"cover"` | Fit |
+| `keep` | `center` \| `top` \| `bottom` | `"center"` | Keep in view. What filling crops last: the sky or the ground. |
+| `dim` | number | `0` | Darken. Keeps a bright picture from outshining everything else. |
 
 ## Data sources
 
