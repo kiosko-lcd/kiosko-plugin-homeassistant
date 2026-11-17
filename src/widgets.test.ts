@@ -26,9 +26,9 @@ function texts(w: WidgetDefinition<any, any>, options: Record<string, unknown>, 
 const state = (w: WidgetDefinition<any, any>, fn: 'urgent' | 'idle' | 'empty', options: Record<string, unknown>, d: HaData | undefined) =>
   w[fn]!({ options: validate(w.options!, options).value, data: undefined, sources: { [SOURCE]: d }, now: NOW, working: true, workday: DEFAULT_WORKDAY } as never);
 
-test('the plugin: one source, three widgets, all with demos', () => {
+test('the plugin: one source, four widgets, all with demos', () => {
   assert.equal(plugin.id, 'homeassistant');
-  assert.deepEqual(plugin.widgets!.map((w) => w.id), ['entity', 'entities', 'attention']);
+  assert.deepEqual(plugin.widgets!.map((w) => w.id), ['entity', 'entities', 'attention', 'camera']);
   assert.deepEqual(plugin.sources!.map((s) => s.id), ['states']);
   for (const w of plugin.widgets!) assert.ok(w.demo, w.id);
 });
