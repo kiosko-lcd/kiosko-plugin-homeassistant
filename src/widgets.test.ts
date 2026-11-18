@@ -28,7 +28,7 @@ const state = (w: WidgetDefinition<any, any>, fn: 'urgent' | 'idle' | 'empty', o
 
 test('the plugin: one source, four widgets, all with demos', () => {
   assert.equal(plugin.id, 'homeassistant');
-  assert.deepEqual(plugin.widgets!.map((w) => w.id), ['entity', 'entities', 'attention', 'camera']);
+  assert.deepEqual(plugin.widgets!.map((w) => w.id), ['entity', 'entities', 'attention', 'camera', 'energy', 'media', 'people']);
   assert.deepEqual(plugin.sources!.map((s) => s.id), ['states']);
   for (const w of plugin.widgets!) assert.ok(w.demo, w.id);
 });

@@ -6,10 +6,10 @@
     "en": "Home Assistant",
     "es": "Home Assistant"
   },
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": {
-    "en": "Home Assistant on the panel, live over its WebSocket API: any entity in big with its history, lists of entities, what needs you at home (doors left open, low batteries, leaks, the alarm) and your cameras' latest pictures.",
-    "es": "Home Assistant en el panel, en directo por su API WebSocket: cualquier entidad en grande con su histórico, listas de entidades, lo que te necesita en casa (puertas abiertas, baterías bajas, fugas, la alarma) y la última imagen de tus cámaras."
+    "en": "Home Assistant on the panel, live over its WebSocket API: any entity in big with its history, lists of entities, what needs you at home (doors left open, low batteries, leaks, the alarm), your cameras (with the doorbell), the energy flow, what's playing and who is home.",
+    "es": "Home Assistant en el panel, en directo por su API WebSocket: cualquier entidad en grande con su histórico, listas de entidades, lo que te necesita en casa (puertas abiertas, baterías bajas, fugas, la alarma), tus cámaras (con el timbre), el flujo de energía, lo que suena y quién está en casa."
   },
   "author": "Loksly",
   "license": "MIT",
@@ -37,7 +37,15 @@
     "alerts",
     "camera",
     "blink",
-    "security"
+    "security",
+    "energy",
+    "solar",
+    "battery",
+    "music",
+    "tv",
+    "spotify",
+    "presence",
+    "family"
   ],
   "permissions": {
     "network": [
@@ -775,6 +783,7 @@
           "showName": true,
           "showAge": true,
           "motion": "",
+          "doorbell": "",
           "fit": "cover",
           "keep": "center",
           "dim": 0
@@ -867,6 +876,27 @@
             },
             "type": "string"
           },
+          "doorbell": {
+            "title": "Doorbell",
+            "description": "An event entity (event.*) or a binary sensor: for a minute after it rings, a mark on the picture, and the camera takes the tile if allowed.",
+            "default": "",
+            "x-ui": {
+              "label": {
+                "en": "Doorbell",
+                "es": "Timbre"
+              },
+              "help": {
+                "en": "An event entity (event.*) or a binary sensor: for a minute after it rings, a mark on the picture, and the camera takes the tile if allowed.",
+                "es": "Una entidad de evento (event.*) o un sensor binario: durante un minuto tras sonar, una marca en la imagen, y la cámara se queda con la tesela si se le deja."
+              },
+              "placeholder": "event.front_door_ding",
+              "choices": {
+                "source": "homeassistant/states",
+                "list": "doorbells"
+              }
+            },
+            "type": "string"
+          },
           "fit": {
             "title": "Fit",
             "default": "cover",
@@ -955,6 +985,387 @@
       "screenshot": "docs/camera.png",
       "animated": false,
       "urgent": true
+    },
+    {
+      "type": "homeassistant/energy",
+      "name": {
+        "en": "Energy flow",
+        "es": "Flujo de energía"
+      },
+      "description": {
+        "en": "Where the power comes from and goes, now: the grid, the solar panels and the battery around the house, a line for every flow (thicker the more it carries) and today's kWh from the Energy dashboard. A grid sensor is enough to start.",
+        "es": "De dónde viene la energía y adónde va, ahora: la red, las placas y la batería alrededor de la casa, una línea por cada flujo (más gruesa cuanto más lleva) y los kWh de hoy del panel de Energía. Basta un sensor de la red para empezar."
+      },
+      "icon": "zap",
+      "category": "info",
+      "tags": [
+        "home assistant",
+        "energy",
+        "solar",
+        "battery"
+      ],
+      "size": {
+        "min": {
+          "w": 220,
+          "h": 140
+        },
+        "preferred": {
+          "w": 420,
+          "h": 300
+        }
+      },
+      "chrome": "card",
+      "sources": [
+        "homeassistant/states"
+      ],
+      "options": {
+        "default": {
+          "grid": "",
+          "gridExportPositive": false,
+          "solar": "",
+          "battery": "",
+          "batteryChargePositive": false,
+          "batteryLevel": "",
+          "showToday": true,
+          "moving": true
+        },
+        "x-ui": {},
+        "type": "object",
+        "properties": {
+          "grid": {
+            "title": "Grid power",
+            "description": "W or kW, positive while buying. Empty = the one in the Energy dashboard.",
+            "default": "",
+            "x-ui": {
+              "label": {
+                "en": "Grid power",
+                "es": "Potencia de la red"
+              },
+              "help": {
+                "en": "W or kW, positive while buying. Empty = the one in the Energy dashboard.",
+                "es": "W o kW, positiva al comprar. Vacío = la del panel de Energía."
+              },
+              "placeholder": "sensor.grid_power",
+              "choices": {
+                "source": "homeassistant/states",
+                "list": "power"
+              }
+            },
+            "type": "string"
+          },
+          "gridExportPositive": {
+            "title": "The grid sensor is positive while selling",
+            "default": false,
+            "x-ui": {
+              "label": {
+                "en": "The grid sensor is positive while selling",
+                "es": "El sensor de la red es positivo al vender"
+              }
+            },
+            "type": "boolean"
+          },
+          "solar": {
+            "title": "Solar power",
+            "description": "Empty = the one in the Energy dashboard, or none.",
+            "default": "",
+            "x-ui": {
+              "label": {
+                "en": "Solar power",
+                "es": "Potencia solar"
+              },
+              "help": {
+                "en": "Empty = the one in the Energy dashboard, or none.",
+                "es": "Vacío = la del panel de Energía, o ninguna."
+              },
+              "placeholder": "sensor.solar_power",
+              "choices": {
+                "source": "homeassistant/states",
+                "list": "power"
+              }
+            },
+            "type": "string"
+          },
+          "battery": {
+            "title": "Battery power",
+            "description": "Positive while discharging. Empty = the one in the Energy dashboard, or none.",
+            "default": "",
+            "x-ui": {
+              "label": {
+                "en": "Battery power",
+                "es": "Potencia de la batería"
+              },
+              "help": {
+                "en": "Positive while discharging. Empty = the one in the Energy dashboard, or none.",
+                "es": "Positiva al descargar. Vacío = la del panel de Energía, o ninguna."
+              },
+              "placeholder": "sensor.battery_power",
+              "choices": {
+                "source": "homeassistant/states",
+                "list": "power"
+              }
+            },
+            "type": "string"
+          },
+          "batteryChargePositive": {
+            "title": "The battery sensor is positive while charging",
+            "default": false,
+            "x-ui": {
+              "label": {
+                "en": "The battery sensor is positive while charging",
+                "es": "El sensor de la batería es positivo al cargar"
+              }
+            },
+            "type": "boolean"
+          },
+          "batteryLevel": {
+            "title": "Battery level",
+            "description": "Its %, shown in the battery.",
+            "default": "",
+            "x-ui": {
+              "label": {
+                "en": "Battery level",
+                "es": "Nivel de la batería"
+              },
+              "help": {
+                "en": "Its %, shown in the battery.",
+                "es": "Su %, que se ve en la batería."
+              },
+              "placeholder": "sensor.battery_state_of_charge",
+              "choices": {
+                "source": "homeassistant/states",
+                "list": "entities"
+              }
+            },
+            "type": "string"
+          },
+          "showToday": {
+            "title": "Today's energy",
+            "description": "From the Energy dashboard, under each part.",
+            "default": true,
+            "x-ui": {
+              "label": {
+                "en": "Today's energy",
+                "es": "La energía de hoy"
+              },
+              "help": {
+                "en": "From the Energy dashboard, under each part.",
+                "es": "Del panel de Energía, bajo cada parte."
+              }
+            },
+            "type": "boolean"
+          },
+          "moving": {
+            "title": "Moving dots",
+            "description": "Repaints the tile every second.",
+            "default": true,
+            "x-ui": {
+              "label": {
+                "en": "Moving dots",
+                "es": "Puntos en movimiento"
+              },
+              "help": {
+                "en": "Repaints the tile every second.",
+                "es": "Vuelve a pintar la tesela cada segundo."
+              }
+            },
+            "type": "boolean"
+          }
+        }
+      },
+      "screenshot": "docs/energy.png",
+      "animated": false,
+      "urgent": false
+    },
+    {
+      "type": "homeassistant/media",
+      "name": {
+        "en": "Now playing",
+        "es": "Lo que suena"
+      },
+      "description": {
+        "en": "What a Home Assistant media player is playing (the TV, Spotify on a speaker, a Chromecast, Sonos…): cover, title, artist, the app and how far it has got. Of several, the one playing. Hides itself while nothing plays.",
+        "es": "Lo que reproduce un media player de Home Assistant (la tele, Spotify en un altavoz, un Chromecast, Sonos…): carátula, título, artista, la app y por dónde va. De varios, el que suena. Se oculta mientras no suena nada."
+      },
+      "icon": "music",
+      "category": "media",
+      "tags": [
+        "home assistant",
+        "music",
+        "tv",
+        "spotify"
+      ],
+      "size": {
+        "min": {
+          "w": 200,
+          "h": 70
+        },
+        "preferred": {
+          "w": 460,
+          "h": 160
+        }
+      },
+      "chrome": "card",
+      "sources": [
+        "homeassistant/states"
+      ],
+      "options": {
+        "default": {
+          "entity": "",
+          "showCover": true,
+          "showProgress": true
+        },
+        "x-ui": {},
+        "type": "object",
+        "properties": {
+          "entity": {
+            "title": "Player",
+            "description": "One, or several with patterns (media_player.*, !media_player.kitchen): the one playing is shown. Empty = all.",
+            "default": "",
+            "x-ui": {
+              "label": {
+                "en": "Player",
+                "es": "Reproductor"
+              },
+              "help": {
+                "en": "One, or several with patterns (media_player.*, !media_player.kitchen): the one playing is shown. Empty = all.",
+                "es": "Uno, o varios con patrones (media_player.*, !media_player.cocina): se ve el que suena. Vacío = todos."
+              },
+              "placeholder": "media_player.living_room",
+              "choices": {
+                "source": "homeassistant/states",
+                "list": "players"
+              }
+            },
+            "type": "string"
+          },
+          "showCover": {
+            "title": "Show the cover",
+            "default": true,
+            "x-ui": {
+              "label": {
+                "en": "Show the cover",
+                "es": "Mostrar la carátula"
+              }
+            },
+            "type": "boolean"
+          },
+          "showProgress": {
+            "title": "Show how far it has got",
+            "default": true,
+            "x-ui": {
+              "label": {
+                "en": "Show how far it has got",
+                "es": "Mostrar por dónde va"
+              }
+            },
+            "type": "boolean"
+          }
+        }
+      },
+      "screenshot": "docs/media.png",
+      "animated": false,
+      "urgent": false
+    },
+    {
+      "type": "homeassistant/people",
+      "name": {
+        "en": "Who is home",
+        "es": "Quién está en casa"
+      },
+      "description": {
+        "en": "The people Home Assistant knows, with their photo: at home, away or in a zone of yours (Work, School), and since when.",
+        "es": "Las personas que conoce Home Assistant, con su foto: en casa, fuera o en una de tus zonas (Trabajo, Colegio), y desde cuándo."
+      },
+      "icon": "users",
+      "category": "info",
+      "tags": [
+        "home assistant",
+        "presence",
+        "family"
+      ],
+      "size": {
+        "min": {
+          "w": 140,
+          "h": 80
+        },
+        "preferred": {
+          "w": 420,
+          "h": 160
+        }
+      },
+      "chrome": "card",
+      "sources": [
+        "homeassistant/states"
+      ],
+      "options": {
+        "default": {
+          "people": [],
+          "showSince": true,
+          "homeFirst": false
+        },
+        "x-ui": {},
+        "type": "object",
+        "properties": {
+          "people": {
+            "title": "People",
+            "description": "In this order. Empty = everyone.",
+            "default": [],
+            "x-ui": {
+              "label": {
+                "en": "People",
+                "es": "Personas"
+              },
+              "help": {
+                "en": "In this order. Empty = everyone.",
+                "es": "En este orden. Vacío = todas."
+              },
+              "widget": "filter",
+              "choices": {
+                "source": "homeassistant/states",
+                "list": "people"
+              }
+            },
+            "type": "array",
+            "items": {
+              "default": "",
+              "x-ui": {
+                "placeholder": "name, group/*, !old-*",
+                "choices": {
+                  "source": "homeassistant/states",
+                  "list": "people"
+                }
+              },
+              "type": "string"
+            },
+            "x-filter": true
+          },
+          "showSince": {
+            "title": "Since when",
+            "default": true,
+            "x-ui": {
+              "label": {
+                "en": "Since when",
+                "es": "Desde cuándo"
+              }
+            },
+            "type": "boolean"
+          },
+          "homeFirst": {
+            "title": "Who is home first",
+            "default": false,
+            "x-ui": {
+              "label": {
+                "en": "Who is home first",
+                "es": "Primero quien está en casa"
+              }
+            },
+            "type": "boolean"
+          }
+        }
+      },
+      "screenshot": "docs/people.png",
+      "animated": false,
+      "urgent": false
     }
   ],
   "sources": [

@@ -27,6 +27,24 @@ export interface CameraData {
   changedAt?: number;
   /** Sample data: paints a drawn scene instead of a picture. */
   demo?: boolean;
+  /** Motion or a ring when it was read: look again sooner. */
+  lively?: boolean;
+}
+
+/** How long a ring keeps the camera marked (and urgent). */
+export const RING_MS = 60_000;
+
+/**
+ * Whether a doorbell is ringing: an `event` entity rang in the last RING_MS
+ * (its state is when), or a binary sensor is on.
+ */
+export function ringing(e: Entity | undefined, now: number): boolean {
+  if (!e) return false;
+  if (e.domain === 'event') {
+    const at = Date.parse(e.state);
+    return Number.isFinite(at) && now - at >= -5_000 && now - at < RING_MS;
+  }
+  return e.state === 'on';
 }
 
 /** The last picture seen of each camera, so "how old" means since it changed, not since it was read. */
@@ -39,6 +57,18 @@ export function pictureChangedAt(camera: string, bytes: Uint8Array, now: number)
   if (last?.hash === hash) return last.at;
   seen.set(camera, { hash, at: now });
   return now;
+}
+
+/**
+ * Reads an entity's picture from Home Assistant: a camera's still, a media
+ * player's cover, a person's photo. A path is read from Home Assistant (its
+ * token is in it); a full URL as it is.
+ */
+export async function readPicture(base: string, path: string, signal?: AbortSignal): Promise<Uint8Array> {
+  const url = /^https?:\/\//i.test(path) ? path : base + (path.startsWith('/') ? path : `/${path}`);
+  const res = await fetch(url, signal ? { signal } : {});
+  if (!res.ok) throw new Error(`Home Assistant answered HTTP ${res.status} for ${path.split('?')[0]}`);
+  return new Uint8Array(await res.arrayBuffer());
 }
 
 /** The motion sensor that goes with a camera: the one chosen, or Blink's and most integrations' `binary_sensor.<camera>_motion`. */
@@ -86,6 +116,12 @@ export const camera = defineWidget({
       label: { en: 'Motion sensor', es: 'Sensor de movimiento' },
       help: { en: 'Empty = binary_sensor.<camera>_motion if there is one (Blink names them so).', es: 'Vacío = binary_sensor.<cámara>_motion si existe (Blink los llama así).' },
     }),
+    doorbell: t.string({
+      choices: { source: SOURCE, list: 'doorbells' },
+      placeholder: 'event.front_door_ding',
+      label: { en: 'Doorbell', es: 'Timbre' },
+      help: { en: 'An event entity (event.*) or a binary sensor: for a minute after it rings, a mark on the picture, and the camera takes the tile if allowed.', es: 'Una entidad de evento (event.*) o un sensor binario: durante un minuto tras sonar, una marca en la imagen, y la cámara se queda con la tesela si se le deja.' },
+    }),
     fit: t.enum(['cover', 'contain'] as const, { label: { en: 'Fit', es: 'Ajuste' }, labels: { cover: { en: 'Fill (crop)', es: 'Llenar (recorta)' }, contain: { en: 'Whole picture', es: 'Imagen entera' } } }),
     keep: t.enum(['center', 'top', 'bottom'] as const, {
       advanced: true,
@@ -97,7 +133,8 @@ export const camera = defineWidget({
   }),
   intervalMs: 60_000,
   // Until the connection has the camera, look again soon: the first picture shouldn't wait a minute.
-  intervalOf: ({ data }: { data: CameraData | undefined }) => (!data || data.state === 'waiting' ? 5_000 : undefined),
+  // While someone moves or rings, every 10 s: the picture to look at is the one of now.
+  intervalOf: ({ data }: { data: CameraData | undefined }) => (!data || data.state === 'waiting' ? 5_000 : data.lively ? 10_000 : undefined),
   timeoutMs: 30_000,
   async fetch({ options, sources, canvas, signal }): Promise<CameraData> {
     if (!options.entity) return { state: 'pick' };
@@ -106,15 +143,16 @@ export const camera = defineWidget({
     const e = d.entities[options.entity];
     if (!e) return { state: 'missing' };
     if (!e.picture) return { state: 'nopicture' };
-    const res = await fetch(d.base + e.picture, { signal });
-    if (!res.ok) throw new Error(`Home Assistant answered HTTP ${res.status} for ${options.entity}`);
-    const bytes = new Uint8Array(await res.arrayBuffer());
-    return { state: 'ok', img: await canvas.loadImage(Buffer.from(bytes)), changedAt: pictureChangedAt(options.entity, bytes, Date.now()) };
+    const bytes = await readPicture(d.base, e.picture, signal);
+    const now = Date.now();
+    const lively = motionOf(d.entities, e.id, options.motion)?.state === 'on' || ringing(options.doorbell ? d.entities[options.doorbell] : undefined, now);
+    return { state: 'ok', img: await canvas.loadImage(Buffer.from(bytes)), changedAt: pictureChangedAt(options.entity, bytes, now), ...(lively ? { lively } : {}) };
   },
   redraw: 'minute',
-  urgent: ({ options, sources }) => {
+  urgent: ({ options, sources, now }) => {
     const d = dataOf(sources);
-    return d?.state === 'ok' && !!options.entity && motionOf(d.entities, options.entity, options.motion)?.state === 'on';
+    if (d?.state !== 'ok' || !options.entity) return false;
+    return motionOf(d.entities, options.entity, options.motion)?.state === 'on' || ringing(options.doorbell ? d.entities[options.doorbell] : undefined, now);
   },
   // Off by default: a camera's tile is for looking, not for interrupting. The user turns it on.
   takeOver: false,
@@ -155,6 +193,7 @@ export const camera = defineWidget({
       name: options.showName ? options.name || e?.name || options.entity : '',
       age: options.showAge && data.changedAt ? ctx.fmt.ago(data.changedAt) : '',
       motion: motion?.state === 'on',
+      ring: !!d && ringing(options.doorbell ? d.entities[options.doorbell] : undefined, ctx.now),
       stale: stale ? (e?.state === 'unavailable' ? tr({ en: 'camera unavailable', es: 'cámara no disponible' }) : tr({ en: 'offline', es: 'sin conexión' })) : '',
     });
   },
@@ -176,7 +215,7 @@ function why(d: HaData | undefined, data: CameraData | undefined, entity: string
 }
 
 /** The text over the picture: name and age at the bottom on a shade, motion and trouble at the top. */
-function overlay(g: Graphics, ctx: RenderContext<unknown, unknown>, o: { name: string; age: string; motion: boolean; stale: string }): void {
+function overlay(g: Graphics, ctx: RenderContext<unknown, unknown>, o: { name: string; age: string; motion: boolean; ring: boolean; stale: string }): void {
   const { box, theme, kit } = ctx;
   const { fonts, colors } = theme;
   const s = Math.max(11, Math.round(Math.min(22, box.h * 0.085, box.w * 0.05)));
@@ -216,9 +255,10 @@ function overlay(g: Graphics, ctx: RenderContext<unknown, unknown>, o: { name: s
     kit.drawTracked(g, text, x + ps * (dot ? 1.55 : 0.7), y + h / 2 + ps * 0.36, { size: ps, family: fonts.sansBold, color: dot ? '#fff' : color });
     x += w + ps * 0.5;
   };
-  if (o.motion) {
-    pill(ctx.t({ en: 'Motion', es: 'Movimiento' }), colors.alert, true);
-    g.strokeStyle = colors.alert;
+  if (o.ring) pill(ctx.t({ en: 'Doorbell', es: 'Llaman' }), colors.warn, true);
+  if (o.motion) pill(ctx.t({ en: 'Motion', es: 'Movimiento' }), colors.alert, true);
+  if (o.motion || o.ring) {
+    g.strokeStyle = o.motion ? colors.alert : colors.warn;
     g.lineWidth = Math.max(2, Math.round(s * 0.18));
     g.strokeRect(box.x + g.lineWidth / 2, box.y + g.lineWidth / 2, box.w - g.lineWidth, box.h - g.lineWidth);
   }

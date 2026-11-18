@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { AUTH_RETRY_MS, connect, FLUSH_MS, PING_MS, RETRY_MS, type ConnectionOptions, type Timers, type WsLike } from './connection.ts';
+import { AUTH_RETRY_MS, connect, ENERGY_MS, FLUSH_MS, PING_MS, RETRY_MS, type ConnectionOptions, type Timers, type WsLike } from './connection.ts';
 import type { HaData, RawState } from './ha.ts';
 
 const T0 = Date.parse('2026-11-16T10:00:00Z');
@@ -40,7 +40,7 @@ const STATES: RawState[] = [
 ];
 
 /** A fake Home Assistant behind a fake WebSocket: answers like the real one and records what it was sent. */
-function fakeHa(o: { token?: string; history?: boolean } = {}) {
+function fakeHa(o: { token?: string; history?: boolean; energy?: unknown } = {}) {
   const sockets: { url: string; sent: Record<string, any>[]; open: boolean; push: (m: unknown) => void; fail: () => void }[] = [];
   const factory = (url: string): WsLike => {
     const listeners: Record<string, ((ev?: any) => void)[]> = {};
@@ -63,6 +63,12 @@ function fakeHa(o: { token?: string; history?: boolean } = {}) {
         else if (m.type === 'history/history_during_period') {
           if (o.history === false) s.push({ id: m.id, type: 'result', success: false, error: { code: 'unknown_command', message: 'Unknown command.' } });
           else s.push({ id: m.id, type: 'result', success: true, result: { 'sensor.living_room_temperature': [{ s: '20.1', lu: (T0 - 6 * 3_600_000) / 1000 }, { s: '21.4', lu: (T0 - 120_000) / 1000 }] } });
+        } else if (m.type === 'energy/get_prefs') {
+          // Like Home Assistant without the Energy dashboard set up.
+          if (o.energy === undefined) s.push({ id: m.id, type: 'result', success: false, error: { code: 'not_found', message: 'No prefs' } });
+          else s.push({ id: m.id, type: 'result', success: true, result: o.energy });
+        } else if (m.type === 'recorder/statistics_during_period') {
+          s.push({ id: m.id, type: 'result', success: true, result: Object.fromEntries(m.statistic_ids.map((id: string) => [id, [{ start: T0, end: T0 + 86_400_000, change: id.includes('solar') ? 6.5 : id.includes('export') ? 2.25 : 4 }]])) });
         } else if (m.type === 'ping') s.push({ id: m.id, type: 'pong' });
       },
       close() {
@@ -105,7 +111,7 @@ test('authenticates, reads every state, subscribes, fills the history', async ()
   await tick();
   const s = ha.sockets[0]!;
   assert.equal(s.url, 'ws://ha.local:8123/api/websocket');
-  assert.deepEqual(s.sent.map((m) => m.type).sort(), ['auth', 'get_states', 'history/history_during_period', 'subscribe_events', 'supported_features']);
+  assert.deepEqual(s.sent.map((m) => m.type).sort(), ['auth', 'energy/get_prefs', 'get_states', 'history/history_during_period', 'subscribe_events', 'supported_features']);
   const last = out.at(-1)!;
   assert.equal(last.state, 'ok');
   assert.equal(last.version, '2026.11.1');
@@ -259,4 +265,53 @@ test('stopping (or the signal aborting) closes the socket and leaves no timer', 
   ac.abort();
   assert.equal(ha.sockets[0]!.open, false);
   assert.equal(c.pending(), 0);
+});
+
+test("today's energy from the Energy dashboard, read again every 5 minutes; none when it isn't set up", async () => {
+  const prefs = {
+    energy_sources: [
+      { type: 'grid', flow_from: [{ stat_energy_from: 'sensor.grid_import' }], flow_to: [{ stat_energy_to: 'sensor.grid_export' }], power: [{ stat_rate: 'sensor.grid_power' }] },
+      { type: 'solar', stat_energy_from: 'sensor.solar_energy', stat_rate: 'sensor.solar_power' },
+      { type: 'gas', stat_energy_from: 'sensor.gas' },
+    ],
+  };
+  const ha = fakeHa({ energy: prefs });
+  const c = clock();
+  const out: HaData[] = [];
+  connect(opts(), (d) => out.push(d), { ws: ha.factory, timers: c });
+  await tick();
+  c.advance(FLUSH_MS);
+  const e = out.at(-1)!.energy!;
+  assert.deepEqual({ gridIn: e.gridIn, gridOut: e.gridOut, solar: e.solar, batteryIn: e.batteryIn }, { gridIn: 4, gridOut: 2.25, solar: 6.5, batteryIn: undefined });
+  assert.deepEqual(e.power, { grid: 'sensor.grid_power', solar: 'sensor.solar_power' });
+  const asks = () => ha.sockets[0]!.sent.filter((m) => m.type === 'recorder/statistics_during_period');
+  assert.equal(asks().length, 1);
+  assert.deepEqual(asks()[0]!.statistic_ids, ['sensor.grid_import', 'sensor.grid_export', 'sensor.solar_energy']);
+  assert.deepEqual(asks()[0]!.units, { energy: 'kWh' });
+  c.advance(ENERGY_MS);
+  assert.equal(asks().length, 2);
+  // Without a dashboard: no energy, nothing more asked.
+  const bare = fakeHa();
+  const out2: HaData[] = [];
+  connect(opts(), (d) => out2.push(d), { ws: bare.factory, timers: clock() });
+  await tick();
+  assert.equal(out2.at(-1)!.energy, undefined);
+  assert.equal(bare.sockets[0]!.sent.filter((m) => m.type === 'recorder/statistics_during_period').length, 0);
+});
+
+test("a camera's new token is passed on at once: the old one stops opening its picture", async () => {
+  const ha = fakeHa();
+  const c = clock();
+  const out: HaData[] = [];
+  connect(opts(), (d) => out.push(d), { ws: ha.factory, timers: c });
+  await tick();
+  const cam = (token: string): RawState => ({ entity_id: 'camera.porch', state: 'idle', attributes: { friendly_name: 'Porch', entity_picture: `/api/camera_proxy/camera.porch?token=${token}` }, last_changed: '2026-11-16T08:00:00Z' });
+  ha.change(cam('one'));
+  c.advance(FLUSH_MS);
+  assert.equal(out.at(-1)!.entities['camera.porch']!.picture, '/api/camera_proxy/camera.porch?token=one');
+  const n = out.length;
+  ha.change(cam('two'));
+  c.advance(FLUSH_MS);
+  assert.equal(out.length, n + 1, 'only the token changed, and that is worth passing on');
+  assert.equal(out.at(-1)!.entities['camera.porch']!.picture, '/api/camera_proxy/camera.porch?token=two');
 });

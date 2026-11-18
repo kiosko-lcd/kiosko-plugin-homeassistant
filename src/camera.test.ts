@@ -49,7 +49,7 @@ const png = (color: string) => {
 };
 
 test('the plugin has a camera widget, after the other three', () => {
-  assert.deepEqual(plugin.widgets!.map((w) => w.id), ['entity', 'entities', 'attention', 'camera']);
+  assert.deepEqual(plugin.widgets!.map((w) => w.id), ['entity', 'entities', 'attention', 'camera', 'energy', 'media', 'people']);
 });
 
 test('compact keeps the picture of cameras and image entities, and nothing else', () => {
@@ -108,7 +108,7 @@ test('fetch reads the picture at the path the camera carries, with its own token
     assert.deepEqual(r.asked, []);
   }
   // A refusal is an error (Kiosko keeps the last picture and shows the error).
-  await assert.rejects(fetchWith({ entity: 'camera.porch' }, d, () => new Response('', { status: 403 })), /HTTP 403/);
+  await assert.rejects(fetchWith({ entity: 'camera.porch' }, d, () => new Response('', { status: 403 })), /HTTP 403 for \/api\/camera_proxy\/camera.porch$/);
   // While waiting for the connection it looks again soon; with a picture, every minute (or as set).
   assert.equal(camera.intervalOf!({ options: opts({}), data: { state: 'waiting' } }), 5_000);
   assert.equal(camera.intervalOf!({ options: opts({}), data: { state: 'ok' } }), undefined);
