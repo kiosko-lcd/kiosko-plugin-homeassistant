@@ -1,6 +1,6 @@
 {
   "name": "kiosko-plugin-homeassistant",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "Home Assistant on the panel, live over its WebSocket API: any entity in big with its history, lists of entities, and what needs you at home (doors left open, low batteries, leaks, the alarm).",
   "type": "module",
   "license": "MIT",

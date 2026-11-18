@@ -37,6 +37,107 @@ export interface Entity {
    * path as a state change: the long-lived token never leaves the source.
    */
   picture?: string;
+  /** Media players: what is playing. */
+  media?: Media;
+  /** People and device trackers: their photo (`/local/alex.jpg` or a full URL). */
+  photo?: string;
+}
+
+/** What a media player is playing, as far as it says. */
+export interface Media {
+  title?: string;
+  artist?: string;
+  album?: string;
+  /** The app or source: Spotify, Netflix, TV. */
+  app?: string;
+  /** Seconds. */
+  duration?: number;
+  /** Seconds, as of `positionAt`. */
+  position?: number;
+  /** When `position` was measured, epoch ms: while playing, it moves on from there. */
+  positionAt?: number;
+}
+
+/**
+ * Today's energy, from Home Assistant's Energy dashboard (its statistics, in
+ * kWh), and the power sensors it has for a live flow. Absent when the
+ * dashboard isn't set up (or the user can't read it).
+ */
+export interface EnergyToday {
+  /** Bought from the grid today. */
+  gridIn?: number;
+  /** Sold to the grid today. */
+  gridOut?: number;
+  solar?: number;
+  /** Into the battery. */
+  batteryIn?: number;
+  /** Out of the battery. */
+  batteryOut?: number;
+  /** When it was read, epoch ms. */
+  at: number;
+  /** Power sensors set in the dashboard (Home Assistant 2025.12 and later), for when the widget isn't told which. */
+  power?: { grid?: string; solar?: string; battery?: string };
+}
+
+/** The statistics a dashboard's preferences point at, and its power sensors. */
+export interface EnergyStats {
+  gridIn: string[];
+  gridOut: string[];
+  solar: string[];
+  batteryIn: string[];
+  batteryOut: string[];
+  power: { grid?: string; solar?: string; battery?: string };
+}
+
+/** Reads `energy/get_prefs`: which statistics hold each flow. Unknown shapes give empty lists. */
+export function energyStats(prefs: unknown): EnergyStats {
+  const out: EnergyStats = { gridIn: [], gridOut: [], solar: [], batteryIn: [], batteryOut: [], power: {} };
+  const sources = (prefs as { energy_sources?: unknown[] } | null)?.energy_sources;
+  if (!Array.isArray(sources)) return out;
+  const id = (v: unknown) => (typeof v === 'string' && v ? v : undefined);
+  const rate = (s: Record<string, any>) => id(s.stat_rate) ?? id(s.power?.[0]?.stat_rate) ?? id(s.power_config?.stat_rate);
+  for (const s of sources as Record<string, any>[]) {
+    if (s?.type === 'grid') {
+      for (const f of Array.isArray(s.flow_from) ? s.flow_from : []) if (id(f?.stat_energy_from)) out.gridIn.push(f.stat_energy_from);
+      for (const f of Array.isArray(s.flow_to) ? s.flow_to : []) if (id(f?.stat_energy_to)) out.gridOut.push(f.stat_energy_to);
+      const r = rate(s);
+      if (r) out.power.grid ??= r;
+    } else if (s?.type === 'solar') {
+      if (id(s.stat_energy_from)) out.solar.push(s.stat_energy_from);
+      const r = rate(s);
+      if (r) out.power.solar ??= r;
+    } else if (s?.type === 'battery') {
+      if (id(s.stat_energy_from)) out.batteryOut.push(s.stat_energy_from);
+      if (id(s.stat_energy_to)) out.batteryIn.push(s.stat_energy_to);
+      const r = rate(s);
+      if (r) out.power.battery ??= r;
+    }
+  }
+  return out;
+}
+
+/** Sums today's `change` of each flow from `recorder/statistics_during_period` (period: day). */
+export function energyToday(stats: EnergyStats, result: unknown, at: number): EnergyToday {
+  const rows = (result ?? {}) as Record<string, { change?: number | null }[]>;
+  const sum = (ids: string[]) => {
+    if (!ids.length) return undefined;
+    let total = 0;
+    for (const id of ids) for (const r of rows[id] ?? []) if (typeof r?.change === 'number' && Number.isFinite(r.change)) total += r.change;
+    return total;
+  };
+  const e: EnergyToday = { at };
+  const put = (k: 'gridIn' | 'gridOut' | 'solar' | 'batteryIn' | 'batteryOut') => {
+    const v = sum(stats[k]);
+    if (v !== undefined) e[k] = v;
+  };
+  put('gridIn');
+  put('gridOut');
+  put('solar');
+  put('batteryIn');
+  put('batteryOut');
+  const power = Object.fromEntries(Object.entries(stats.power).filter(([, v]) => v));
+  if (Object.keys(power).length) e.power = power;
+  return e;
 }
 
 /**
@@ -56,6 +157,8 @@ export interface HaData {
   version?: string;
   /** Its address for HTTP (`http://homeassistant.local:8123`), where entity pictures are read. */
   base?: string;
+  /** Today's energy, when the Energy dashboard is set up. */
+  energy?: EnergyToday;
   entities: Record<string, Entity>;
   /** Numeric history. A class instance, so Kiosko compares it by identity and not by content. */
   history?: History;
@@ -98,7 +201,26 @@ export function compact(s: RawState): Entity {
   const battery = num(a.battery_level) ?? num(a.battery);
   if (battery !== undefined) e.battery = battery;
   const picture = str(a.entity_picture);
-  if (picture && (e.domain === 'camera' || e.domain === 'image')) e.picture = picture;
+  if (picture && (e.domain === 'camera' || e.domain === 'image' || e.domain === 'media_player')) e.picture = picture;
+  if (picture && (e.domain === 'person' || e.domain === 'device_tracker')) e.photo = picture;
+  if (e.domain === 'media_player') {
+    const m: Media = {};
+    const title = str(a.media_title);
+    if (title) m.title = title;
+    const artist = str(a.media_artist) ?? str(a.media_series_title);
+    if (artist) m.artist = artist;
+    const album = str(a.media_album_name);
+    if (album) m.album = album;
+    const app = str(a.app_name) ?? str(a.source);
+    if (app) m.app = app;
+    const duration = num(a.media_duration);
+    if (duration !== undefined && duration > 0) m.duration = duration;
+    const position = num(a.media_position);
+    if (position !== undefined) m.position = position;
+    const at = Date.parse(str(a.media_position_updated_at) ?? '');
+    if (Number.isFinite(at)) m.positionAt = at;
+    if (Object.keys(m).length) e.media = m;
+  }
   return e;
 }
 
@@ -580,6 +702,9 @@ export function demoHome(now: number, locale = 'en'): HaData {
     { id: 'sensor.outdoor_temperature', name: n('Outdoor temperature', 'Temperatura exterior'), state: '11.2', unit: '°C', deviceClass: 'temperature', stateClass: 'measurement', changedAt: ago(6 * min) },
     { id: 'sensor.house_power', name: n('House power', 'Consumo de la casa'), state: '1534', unit: 'W', deviceClass: 'power', stateClass: 'measurement', changedAt: ago(0.2 * min) },
     { id: 'sensor.solar_power', name: n('Solar production', 'Producción solar'), state: '2210', unit: 'W', deviceClass: 'power', stateClass: 'measurement', changedAt: ago(0.4 * min) },
+    { id: 'sensor.grid_power', name: n('Grid power', 'Potencia de la red'), state: '0', unit: 'W', deviceClass: 'power', stateClass: 'measurement', changedAt: ago(0.1 * min) },
+    { id: 'sensor.battery_power', name: n('Battery power', 'Potencia de la batería'), state: '-420', unit: 'W', deviceClass: 'power', stateClass: 'measurement', changedAt: ago(0.1 * min) },
+    { id: 'sensor.battery_level', name: n('Battery level', 'Nivel de la batería'), state: '64', unit: '%', deviceClass: 'battery', stateClass: 'measurement', changedAt: ago(3 * min) },
     { id: 'sensor.energy_today', name: n('Energy today', 'Energía hoy'), state: '7.84', unit: 'kWh', deviceClass: 'energy', stateClass: 'total_increasing', changedAt: ago(1 * min) },
     { id: 'sensor.hallway_motion_battery', name: n('Hallway sensor battery', 'Batería sensor pasillo'), state: '8', unit: '%', deviceClass: 'battery', stateClass: 'measurement', changedAt: ago(30 * 3_600_000) },
     { id: 'sensor.front_door_lock_battery', name: n('Front door lock battery', 'Batería cerradura'), state: '64', unit: '%', deviceClass: 'battery', stateClass: 'measurement', changedAt: ago(3 * 3_600_000) },
@@ -597,6 +722,8 @@ export function demoHome(now: number, locale = 'en'): HaData {
     { id: 'climate.living_room', name: n('Thermostat', 'Termostato'), state: 'heat', current: 21.4, target: 22, action: 'heating', unit: '°C', changedAt: ago(3 * 3_600_000) },
     { id: 'person.alex', name: 'Alex', state: 'home', changedAt: ago(4 * 3_600_000) },
     { id: 'person.sam', name: 'Sam', state: n('Work', 'Trabajo'), changedAt: ago(6 * 3_600_000) },
+    { id: 'person.robin', name: 'Robin', state: 'not_home', changedAt: ago(35 * min) },
+    { id: 'media_player.living_room_speaker', name: n('Living room speaker', 'Altavoz del salón'), state: 'playing', picture: '/api/media_player_proxy/media_player.living_room_speaker?token=demo', media: { title: n('Blue in Green', 'Blue in Green'), artist: 'Miles Davis', album: 'Kind of Blue', app: 'Spotify', duration: 337, position: 128, positionAt: ago(0) }, changedAt: ago(3 * min) },
     { id: 'media_player.living_room_tv', name: n('Living room TV', 'Tele del salón'), state: 'playing', changedAt: ago(25 * min) },
     { id: 'sensor.garage_temperature', name: n('Garage temperature', 'Temperatura garaje'), state: 'unavailable', unit: '°C', deviceClass: 'temperature', stateClass: 'measurement', changedAt: ago(14 * 3_600_000) },
     { id: 'update.home_assistant_core_update', name: 'Home Assistant Core', state: 'on', changedAt: ago(20 * 3_600_000) },
@@ -624,5 +751,9 @@ export function demoHome(now: number, locale = 'en'): HaData {
     const e = entities[id]!;
     e.state = String(Math.round(last * (e.unit === 'W' ? 1 : 10)) / (e.unit === 'W' ? 1 : 10));
   }
-  return { state: 'ok', version: '2026.11.1', base: 'http://homeassistant.local:8123', entities, history };
+  // The grid makes up what the sun doesn't, with the battery charging.
+  const w = (id: string) => Number(entities[id]!.state);
+  entities['sensor.grid_power']!.state = String(Math.round(w('sensor.house_power') - w('sensor.solar_power') - w('sensor.battery_power')));
+  const energy = { gridIn: 3.1, gridOut: 4.6, solar: 14.2, batteryIn: 3.4, batteryOut: 2.1, at: now };
+  return { state: 'ok', version: '2026.11.1', base: 'http://homeassistant.local:8123', energy, entities, history };
 }

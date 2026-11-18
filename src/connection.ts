@@ -11,7 +11,7 @@
  * 5 min before trying again, so a wrong token doesn't flood Home
  * Assistant's log with failed logins (and trip its IP ban).
  */
-import { compact, History, httpBase, parseHistory, wantsHistory, websocketUrl, type Entity, type HaData, type RawState } from './ha.ts';
+import { compact, energyStats, energyToday, History, httpBase, type EnergyStats, type EnergyToday, parseHistory, wantsHistory, websocketUrl, type Entity, type HaData, type RawState } from './ha.ts';
 import { matchFilter, type Filter } from '@kiosko/sdk';
 
 /** What the connection needs of a WebSocket: the browser API, which Node ≥ 22 has built in. */
@@ -62,6 +62,8 @@ export const PING_MS = 30_000;
 export const FLUSH_MS = 1_000;
 export const RETRY_MS = [2_000, 5_000, 10_000, 30_000, 60_000];
 export const AUTH_RETRY_MS = 5 * 60_000;
+/** How often today's energy is read again from the statistics (they are kept every 5 minutes). */
+export const ENERGY_MS = 5 * 60_000;
 
 /**
  * Connects and keeps connected until `signal` aborts (or the returned
@@ -87,7 +89,10 @@ export function connect(o: ConnectionOptions, emit: (d: HaData) => void, deps: {
   let ws: WsLike | null = null;
   let attempt = 0;
   let nextId = 1;
-  let ids = { states: 0, subscribe: 0, history: 0, ping: 0 };
+  let ids = { states: 0, subscribe: 0, history: 0, ping: 0, prefs: 0, energy: 0 };
+  let stats: EnergyStats | null = null;
+  let energy: EnergyToday | undefined;
+  let energyTimer: unknown = null;
   let awaitingPong = false;
   let retryTimer: unknown = null;
   let pingTimer: unknown = null;
@@ -99,6 +104,7 @@ export function connect(o: ConnectionOptions, emit: (d: HaData) => void, deps: {
     ...(since !== undefined ? { since } : {}),
     ...(version ? { version } : {}),
     base: httpBase(o.url),
+    ...(energy ? { energy } : {}),
     entities: Object.fromEntries(entities),
     history,
   });
@@ -202,8 +208,10 @@ export function connect(o: ConnectionOptions, emit: (d: HaData) => void, deps: {
       const n = Number(e.state);
       if (Number.isFinite(n) && e.state.trim() !== '') history.add(id, Date.parse(data.new_state.last_updated ?? '') || timers.now(), n, timers.now());
     }
-    // Attribute-only changes the widgets don't paint aren't worth a frame.
-    if (prev && prev.state === e.state && prev.name === e.name && prev.current === e.current && prev.target === e.target && prev.action === e.action && prev.battery === e.battery) return;
+    // Attribute-only changes the widgets don't paint aren't worth a frame. A
+    // camera's picture is: its token changes every few minutes, and the old one
+    // stops opening it.
+    if (prev && prev.state === e.state && prev.name === e.name && prev.current === e.current && prev.target === e.target && prev.action === e.action && prev.battery === e.battery && prev.picture === e.picture && prev.photo === e.photo && JSON.stringify(prev.media) === JSON.stringify(e.media)) return;
     changed();
   };
 
@@ -231,6 +239,8 @@ export function connect(o: ConnectionOptions, emit: (d: HaData) => void, deps: {
         request({ type: 'supported_features', features: { coalesce_messages: 1 } });
         request({ type: 'get_states' }, 'states');
         request({ type: 'subscribe_events', event_type: 'state_changed' }, 'subscribe');
+        // The Energy dashboard, if set up: which statistics hold today's energy.
+        request({ type: 'energy/get_prefs' }, 'prefs');
         pingTimer = timers.setTimeout(ping, PING_MS);
         return;
       case 'auth_invalid':
@@ -264,6 +274,16 @@ export function connect(o: ConnectionOptions, emit: (d: HaData) => void, deps: {
             onHistory(m.result);
             changed();
           } else log(`no history: ${m.error?.message ?? 'refused'}`);
+        } else if (m.id === ids.prefs) {
+          // Not set up (an error), or set up with nothing to read: no energy, and no noise in the log.
+          stats = m.success ? energyStats(m.result) : null;
+          if (stats && [stats.gridIn, stats.gridOut, stats.solar, stats.batteryIn, stats.batteryOut].some((l) => l.length)) readEnergy();
+          else stats = null;
+        } else if (m.id === ids.energy) {
+          if (m.success && stats) {
+            energy = energyToday(stats, m.result, timers.now());
+            changed();
+          } else if (!m.success) log(`no energy statistics: ${m.error?.message ?? 'refused'}`);
         } else if (m.id === ids.subscribe && !m.success) {
           log(`subscribe failed: ${m.error?.message ?? 'refused'}`);
         }
@@ -271,10 +291,28 @@ export function connect(o: ConnectionOptions, emit: (d: HaData) => void, deps: {
     }
   };
 
+  /** Today's energy, from midnight, every ENERGY_MS while connected. */
+  const readEnergy = () => {
+    energyTimer = null;
+    if (stopped || !ws || !stats) return;
+    const midnight = new Date(timers.now());
+    midnight.setHours(0, 0, 0, 0);
+    request({
+      type: 'recorder/statistics_during_period',
+      start_time: midnight.toISOString(),
+      statistic_ids: [...new Set([...stats.gridIn, ...stats.gridOut, ...stats.solar, ...stats.batteryIn, ...stats.batteryOut])],
+      period: 'day',
+      types: ['change'],
+      units: { energy: 'kWh' },
+    }, 'energy');
+    energyTimer = timers.setTimeout(readEnergy, ENERGY_MS);
+  };
+
   const clearTimers = () => {
     if (pingTimer) timers.clearTimeout(pingTimer);
     if (retryTimer) timers.clearTimeout(retryTimer);
-    pingTimer = retryTimer = null;
+    if (energyTimer) timers.clearTimeout(energyTimer);
+    pingTimer = retryTimer = energyTimer = null;
   };
 
   /** Closes the socket (if any) and tries again in `ms`. */
@@ -309,7 +347,7 @@ export function connect(o: ConnectionOptions, emit: (d: HaData) => void, deps: {
     retryTimer = null;
     if (stopped) return;
     awaitingPong = false;
-    ids = { states: 0, subscribe: 0, history: 0, ping: 0 };
+    ids = { states: 0, subscribe: 0, history: 0, ping: 0, prefs: 0, energy: 0 };
     nextId = 1;
     let w: WsLike;
     try {

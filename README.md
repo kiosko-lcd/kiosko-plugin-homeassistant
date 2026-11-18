@@ -1,6 +1,6 @@
 # kiosko-plugin-homeassistant
 
-Home Assistant on the panel, live over its WebSocket API: any entity in big with its history, lists of entities, what needs you at home (doors left open, low batteries, leaks, the alarm) and your cameras' latest pictures.
+Home Assistant on the panel, live over its WebSocket API: any entity in big with its history, lists of entities, what needs you at home (doors left open, low batteries, leaks, the alarm), your cameras (with the doorbell), the energy flow, what's playing and who is home.
 
 A plugin for [Kiosko](https://github.com/kiosko-lcd/kiosko), the widget mosaic for small USB LCD panels.
 
@@ -96,7 +96,7 @@ The latest picture of a Home Assistant camera (Blink, Reolink, ONVIF…), refres
 
 Uses: `homeassistant/states`.
 
-The picture is read from Home Assistant's camera proxy with the camera's own short-lived token (the one in its `entity_picture`, renewed by Home Assistant every few minutes): your long-lived token stays in the source. What the picture is depends on the camera: a fresh still for one that streams; for a battery camera like **Blink**, the last thumbnail it took (on motion, or when asked with Home Assistant's `blink.trigger_camera`), so the age tells how old it is. "Keep the tile while urgent" is off by default: turn it on to have the camera take over its tile while its motion sensor is on.
+The picture is read from Home Assistant's camera proxy with the camera's own short-lived token (the one in its `entity_picture`, renewed by Home Assistant every few minutes): your long-lived token stays in the source. What the picture is depends on the camera: a fresh still for one that streams; for a battery camera like **Blink**, the last thumbnail it took (on motion, or when asked with Home Assistant's `blink.trigger_camera`), so the age tells how old it is. "Keep the tile while urgent" is off by default: turn it on to have the camera take over its tile while its motion sensor is on or for a minute after the doorbell rings. While someone moves or rings, the picture is read every 10 s.
 
 | Option | Type | Default | |
 |---|---|---|---|
@@ -105,9 +105,57 @@ The picture is read from Home Assistant's camera proxy with the camera's own sho
 | `showName` | boolean | `true` | Show the name |
 | `showAge` | boolean | `true` | Show how old the picture is. Since the picture last changed. A battery camera (Blink) only takes a new one on motion or when asked. |
 | `motion` | string | `""` | Motion sensor. Empty = binary_sensor.<camera>_motion if there is one (Blink names them so). |
+| `doorbell` | string | `""` | Doorbell. An event entity (event.*) or a binary sensor: for a minute after it rings, a mark on the picture, and the camera takes the tile if allowed. |
 | `fit` | `cover` \| `contain` | `"cover"` | Fit |
 | `keep` | `center` \| `top` \| `bottom` | `"center"` | Keep in view. What filling crops last: the sky or the ground. |
 | `dim` | number | `0` | Darken. Keeps a bright picture from outshining everything else. |
+
+### Energy flow — `homeassistant/energy`
+
+Where the power comes from and goes, now: the grid, the solar panels and the battery around the house, a line for every flow (thicker the more it carries, with dots running along it) and today's kWh from the Energy dashboard. A grid sensor is enough to start.
+
+![Energy flow](docs/energy.png)
+
+Uses: `homeassistant/states`. Today's energy is read from the statistics of Home Assistant's **Energy dashboard** (every 5 minutes, only when it is set up); the power sensors are the ones chosen here or, when none is, the ones set in the dashboard (Home Assistant 2025.12 and later).
+
+| Option | Type | Default | |
+|---|---|---|---|
+| `grid` | string | `""` | Grid power. W or kW, positive while buying. Empty = the one in the Energy dashboard. |
+| `gridExportPositive` | boolean | `false` | The grid sensor is positive while selling |
+| `solar` | string | `""` | Solar power. Empty = the one in the Energy dashboard, or none. |
+| `battery` | string | `""` | Battery power. Positive while discharging. Empty = the one in the Energy dashboard, or none. |
+| `batteryChargePositive` | boolean | `false` | The battery sensor is positive while charging |
+| `batteryLevel` | string | `""` | Battery level. Its %, shown in the battery. |
+| `showToday` | boolean | `true` | Today's energy. From the Energy dashboard, under each part. |
+| `moving` | boolean | `true` | Moving dots. Repaints the tile every second. |
+
+### Now playing — `homeassistant/media`
+
+What a Home Assistant media player is playing (the TV, Spotify on a speaker, a Chromecast, Sonos…): cover, title, artist, the app and how far it has got. Of several, the one playing. Hides itself while nothing plays.
+
+![Now playing](docs/media.png)
+
+Uses: `homeassistant/states`. The cover comes from Home Assistant's media player proxy, with the player's own short-lived token, and is read again only when the track changes.
+
+| Option | Type | Default | |
+|---|---|---|---|
+| `entity` | string | `""` | Player. One, or several with patterns (media_player.*, !media_player.kitchen): the one playing is shown. Empty = all. |
+| `showCover` | boolean | `true` | Show the cover |
+| `showProgress` | boolean | `true` | Show how far it has got |
+
+### Who is home — `homeassistant/people`
+
+The people Home Assistant knows, with their photo: at home, away or in a zone of yours (Work, School), and since when.
+
+![Who is home](docs/people.png)
+
+Uses: `homeassistant/states`.
+
+| Option | Type | Default | |
+|---|---|---|---|
+| `people` | list | `[]` | People. In this order. Empty = everyone. |
+| `showSince` | boolean | `true` | Since when |
+| `homeFirst` | boolean | `false` | Who is home first |
 
 ## Data sources
 

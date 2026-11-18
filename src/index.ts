@@ -1,8 +1,8 @@
 /**
  * Home Assistant on the panel: one shared live connection (WebSocket, no
- * polling) and four cards over it — one entity in big, a list of entities,
- * what needs you at home (a door left open, a low battery, a leak) and a
- * camera's latest picture.
+ * polling) and the cards over it: one entity in big, a list of entities,
+ * what needs you at home (a door left open, a low battery, a leak), a
+ * camera's latest picture, the energy flow, what's playing and who is home.
  */
 import { defineSource, definePlugin, defineWidget, drawEmpty, listLayout, listOptions, t, type Box, type Graphics, type RenderContext } from '@kiosko/sdk';
 import { connect } from './connection.ts';
@@ -14,6 +14,9 @@ import {
 } from './ha.ts';
 import { batteryLevel, iconFor } from './icons.ts';
 import { camera } from './camera.ts';
+import { energy } from './energy.ts';
+import { media } from './media.ts';
+import { people } from './people.ts';
 
 export * from './ha.ts';
 export * from './connection.ts';
@@ -21,6 +24,9 @@ export * from './draw.ts';
 export * from './icons.ts';
 export * from './card.ts';
 export * from './camera.ts';
+export * from './energy.ts';
+export * from './media.ts';
+export * from './people.ts';
 
 const SOURCE = 'homeassistant/states';
 
@@ -74,6 +80,28 @@ export const states = defineSource({
         .filter((e) => e.picture)
         .sort((a, b) => a.name.localeCompare(b.name))
         .map((e) => ({ value: e.id, label: e.name, group: e.domain })),
+    // Doorbells: event entities (their state is when they last rang) and binary sensors.
+    doorbells: (d: HaData) =>
+      Object.values(d?.entities ?? {})
+        .filter((e) => (e.domain === 'event' && (e.deviceClass === 'doorbell' || /ding|ring|doorbell|timbre/i.test(e.id))) || (e.domain === 'binary_sensor' && /ding|ring|doorbell|timbre/i.test(e.id)))
+        .sort((a, b) => a.name.localeCompare(b.name))
+        .map((e) => ({ value: e.id, label: e.name, group: e.domain })),
+    people: (d: HaData) =>
+      Object.values(d?.entities ?? {})
+        .filter((e) => e.domain === 'person')
+        .sort((a, b) => a.name.localeCompare(b.name))
+        .map((e) => ({ value: e.id, label: e.name })),
+    players: (d: HaData) =>
+      Object.values(d?.entities ?? {})
+        .filter((e) => e.domain === 'media_player')
+        .sort((a, b) => a.name.localeCompare(b.name))
+        .map((e) => ({ value: e.id, label: e.name })),
+    // Power sensors, for the energy flow.
+    power: (d: HaData) =>
+      Object.values(d?.entities ?? {})
+        .filter((e) => e.deviceClass === 'power' || ['W', 'kW', 'MW'].includes(e.unit ?? ''))
+        .sort((a, b) => a.name.localeCompare(b.name))
+        .map((e) => ({ value: e.id, label: e.name })),
     motion: (d: HaData) =>
       Object.values(d?.entities ?? {})
         .filter((e) => e.domain === 'binary_sensor' && ['motion', 'occupancy', 'presence'].includes(e.deviceClass ?? ''))
@@ -327,14 +355,14 @@ export const attention = defineWidget({
 export default definePlugin({
   id: 'homeassistant',
   name: { en: 'Home Assistant', es: 'Home Assistant' },
-  version: '0.2.2',
+  version: '0.2.3',
   sdk: '^0.2.0',
   permissions: { network: ['user'] },
   description: {
-    en: 'Home Assistant on the panel, live over its WebSocket API: any entity in big with its history, lists of entities, what needs you at home (doors left open, low batteries, leaks, the alarm) and your cameras\' latest pictures.',
-    es: 'Home Assistant en el panel, en directo por su API WebSocket: cualquier entidad en grande con su histórico, listas de entidades, lo que te necesita en casa (puertas abiertas, baterías bajas, fugas, la alarma) y la última imagen de tus cámaras.',
+    en: 'Home Assistant on the panel, live over its WebSocket API: any entity in big with its history, lists of entities, what needs you at home (doors left open, low batteries, leaks, the alarm), your cameras (with the doorbell), the energy flow, what\'s playing and who is home.',
+    es: 'Home Assistant en el panel, en directo por su API WebSocket: cualquier entidad en grande con su histórico, listas de entidades, lo que te necesita en casa (puertas abiertas, baterías bajas, fugas, la alarma), tus cámaras (con el timbre), el flujo de energía, lo que suena y quién está en casa.',
   },
   icon: 'house',
-  widgets: [entity, entities, attention, camera],
+  widgets: [entity, entities, attention, camera, energy, media, people],
   sources: [states],
 });
