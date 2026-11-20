@@ -52,10 +52,11 @@ export function clock(s: number): string {
 
 export const media = defineWidget({
   id: 'media',
-  name: { en: 'Now playing', es: 'Lo que suena', 'zh-Hant': '正在播放', 'zh-Hans': '正在播放' },
+  name: { en: 'Now playing', es: 'Lo que suena', de: 'Läuft gerade', 'zh-Hant': '正在播放', 'zh-Hans': '正在播放' },
   description: {
     en: 'What a Home Assistant media player is playing (the TV, Spotify on a speaker, a Chromecast, Sonos…): cover, title, artist, the app and how far it has got. Of several, the one playing. Hides itself while nothing plays.',
     es: 'Lo que reproduce un media player de Home Assistant (la tele, Spotify en un altavoz, un Chromecast, Sonos…): carátula, título, artista, la app y por dónde va. De varios, el que suena. Se oculta mientras no suena nada.',
+    de: 'Was ein Home-Assistant-Mediaplayer gerade abspielt (der Fernseher, Spotify auf einem Lautsprecher, ein Chromecast, Sonos…): Cover, Titel, Künstler, die App und wie weit es ist. Von mehreren der, der gerade spielt. Blendet sich aus, solange nichts läuft.',
     'zh-Hant': 'Home Assistant 媒體播放器正在播放的內容（電視、喇叭上的 Spotify、Chromecast、Sonos…）：封面、標題、演出者、應用程式和播放進度。有多台時，顯示正在播放的那台。沒有播放時會自動隱藏。',
     'zh-Hans': 'Home Assistant 媒体播放器正在播放的内容（电视、音箱上的 Spotify、Chromecast、Sonos…）：封面、标题、艺人、应用和播放进度。有多个时，显示正在播放的那个。没有播放时会自动隐藏。',
   },
@@ -68,11 +69,11 @@ export const media = defineWidget({
     entity: t.string({
       choices: { source: SOURCE, list: 'players' },
       placeholder: 'media_player.living_room',
-      label: { en: 'Player', es: 'Reproductor', 'zh-Hant': '播放器', 'zh-Hans': '播放器' },
-      help: { en: 'One, or several with patterns (media_player.*, !media_player.kitchen): the one playing is shown. Empty = all.', es: 'Uno, o varios con patrones (media_player.*, !media_player.cocina): se ve el que suena. Vacío = todos.', 'zh-Hant': '一台，或用萬用字元指定多台（media_player.*, !media_player.kitchen）：顯示正在播放的那台。留空 = 全部。', 'zh-Hans': '一个，或用通配符指定多个（media_player.*, !media_player.kitchen）：显示正在播放的那个。留空 = 全部。' },
+      label: { en: 'Player', es: 'Reproductor', de: 'Player', 'zh-Hant': '播放器', 'zh-Hans': '播放器' },
+      help: { en: 'One, or several with patterns (media_player.*, !media_player.kitchen): the one playing is shown. Empty = all.', es: 'Uno, o varios con patrones (media_player.*, !media_player.cocina): se ve el que suena. Vacío = todos.', de: 'Einer oder mehrere mit Mustern (media_player.*, !media_player.kitchen): Angezeigt wird der, der gerade spielt. Leer = alle.', 'zh-Hant': '一台，或用萬用字元指定多台（media_player.*, !media_player.kitchen）：顯示正在播放的那台。留空 = 全部。', 'zh-Hans': '一个，或用通配符指定多个（media_player.*, !media_player.kitchen）：显示正在播放的那个。留空 = 全部。' },
     }),
-    showCover: t.boolean({ default: true, label: { en: 'Show the cover', es: 'Mostrar la carátula', 'zh-Hant': '顯示封面', 'zh-Hans': '显示封面' } }),
-    showProgress: t.boolean({ default: true, label: { en: 'Show how far it has got', es: 'Mostrar por dónde va', 'zh-Hant': '顯示播放進度', 'zh-Hans': '显示播放进度' } }),
+    showCover: t.boolean({ default: true, label: { en: 'Show the cover', es: 'Mostrar la carátula', de: 'Cover anzeigen', 'zh-Hant': '顯示封面', 'zh-Hans': '显示封面' } }),
+    showProgress: t.boolean({ default: true, label: { en: 'Show how far it has got', es: 'Mostrar por dónde va', de: 'Fortschritt anzeigen', 'zh-Hant': '顯示播放進度', 'zh-Hans': '显示播放进度' } }),
   }),
   intervalMs: 10_000,
   timeoutMs: 20_000,
@@ -108,11 +109,11 @@ export const media = defineWidget({
     const { options, sources, data, t: tr } = ctx;
     const d = dataOf(sources);
     const box = ctx.box;
-    if (!d || d.state === 'unconfigured') return drawMessage(g, box, ctx, tr({ en: 'Home Assistant not set up', es: 'Home Assistant sin configurar', 'zh-Hant': 'Home Assistant 尚未設定', 'zh-Hans': 'Home Assistant 尚未设置' }), tr({ en: 'Set its address and a token in Settings → Data sources', es: 'Pon su dirección y un token en Ajustes → Fuentes de datos', 'zh-Hant': '請在「設定 → 資料來源」中填入其網址和權杖', 'zh-Hans': '请在“设置 → 数据源”中填写其网址和令牌' }));
-    if (d.state === 'connecting') return drawMessage(g, box, ctx, tr({ en: 'Connecting to Home Assistant…', es: 'Conectando con Home Assistant…', 'zh-Hant': '正在連線 Home Assistant…', 'zh-Hans': '正在连接 Home Assistant…' }));
+    if (!d || d.state === 'unconfigured') return drawMessage(g, box, ctx, tr({ en: 'Home Assistant not set up', es: 'Home Assistant sin configurar', de: 'Home Assistant nicht eingerichtet', 'zh-Hant': 'Home Assistant 尚未設定', 'zh-Hans': 'Home Assistant 尚未设置' }), tr({ en: 'Set its address and a token in Settings → Data sources', es: 'Pon su dirección y un token en Ajustes → Fuentes de datos', de: 'Adresse und Token unter Einstellungen → Datenquellen eintragen', 'zh-Hant': '請在「設定 → 資料來源」中填入其網址和權杖', 'zh-Hans': '请在“设置 → 数据源”中填写其网址和令牌' }));
+    if (d.state === 'connecting') return drawMessage(g, box, ctx, tr({ en: 'Connecting to Home Assistant…', es: 'Conectando con Home Assistant…', de: 'Verbinde mit Home Assistant…', 'zh-Hant': '正在連線 Home Assistant…', 'zh-Hans': '正在连接 Home Assistant…' }));
     const e = pickPlayer(d.entities, options.entity);
-    if (!e) return drawMessage(g, box, ctx, tr({ en: 'No media player', es: 'Ningún reproductor', 'zh-Hant': '沒有媒體播放器', 'zh-Hans': '没有媒体播放器' }), options.entity || tr({ en: 'Home Assistant has none', es: 'Home Assistant no tiene ninguno', 'zh-Hant': 'Home Assistant 中沒有任何播放器', 'zh-Hans': 'Home Assistant 中没有任何播放器' }));
-    if (!ACTIVE.has(e.state)) return drawMessage(g, box, ctx, tr({ en: 'Nothing playing', es: 'No suena nada', 'zh-Hant': '沒有正在播放的內容', 'zh-Hans': '没有正在播放的内容' }), e.name);
+    if (!e) return drawMessage(g, box, ctx, tr({ en: 'No media player', es: 'Ningún reproductor', de: 'Kein Mediaplayer', 'zh-Hant': '沒有媒體播放器', 'zh-Hans': '没有媒体播放器' }), options.entity || tr({ en: 'Home Assistant has none', es: 'Home Assistant no tiene ninguno', de: 'Home Assistant hat keinen', 'zh-Hant': 'Home Assistant 中沒有任何播放器', 'zh-Hans': 'Home Assistant 中没有任何播放器' }));
+    if (!ACTIVE.has(e.state)) return drawMessage(g, box, ctx, tr({ en: 'Nothing playing', es: 'No suena nada', de: 'Es läuft nichts', 'zh-Hant': '沒有正在播放的內容', 'zh-Hans': '没有正在播放的内容' }), e.name);
     paintPlayer(g, ctx, e, data);
   },
   demo: ({ now, locale }) => ({ sources: { [SOURCE]: demoHome(now, locale) }, data: { demo: true }, options: { entity: 'media_player.living_room_speaker' } }),
@@ -192,7 +193,7 @@ function paintPlayer(g: Graphics, ctx: RenderContext<{ showCover: boolean; showP
     kit.drawTracked(g, clock(m.duration!), x + w, by + bh + to.size * 1.25, { ...to, align: 'right' });
   } else if (paused) {
     const po = { size: Math.round(ss * 0.8), family: fonts.sans, color: colors.inkDim };
-    kit.drawTracked(g, tr({ en: 'Paused', es: 'En pausa', 'zh-Hant': '已暫停', 'zh-Hans': '已暂停' }), x, y + po.size * 1.4, po);
+    kit.drawTracked(g, tr({ en: 'Paused', es: 'En pausa', de: 'Pausiert', 'zh-Hant': '已暫停', 'zh-Hans': '已暂停' }), x, y + po.size * 1.4, po);
   }
 }
 

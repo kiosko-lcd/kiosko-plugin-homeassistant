@@ -89,10 +89,11 @@ const KEEP: Record<'center' | 'top' | 'bottom', number> = { top: 0, center: 0.5,
 
 export const camera = defineWidget({
   id: 'camera',
-  name: { en: 'Camera', es: 'Cámara', 'zh-Hant': '攝影機', 'zh-Hans': '摄像头' },
+  name: { en: 'Camera', es: 'Cámara', de: 'Kamera', 'zh-Hant': '攝影機', 'zh-Hans': '摄像头' },
   description: {
     en: 'The latest picture of a Home Assistant camera (Blink, Reolink, ONVIF…), refreshed every minute, with how old it is; with a motion sensor, a red mark while it sees someone, and it can take over its tile. A still, not live video.',
     es: 'La última imagen de una cámara de Home Assistant (Blink, Reolink, ONVIF…), refrescada cada minuto, con su antigüedad; con un sensor de movimiento, una marca roja mientras ve a alguien, y puede quedarse con su tesela. Una foto, no vídeo en directo.',
+    de: 'Das neueste Bild einer Home-Assistant-Kamera (Blink, Reolink, ONVIF…), jede Minute aktualisiert, mit seinem Alter; mit einem Bewegungssensor eine rote Markierung, solange sie jemanden sieht, und sie kann ihre Kachel übernehmen. Ein Standbild, kein Live-Video.',
     'zh-Hant': '最新一張 Home Assistant 攝影機畫面（Blink、Reolink、ONVIF…），每分鐘重新整理，並標示畫面是多久前的；搭配動作感測器時，偵測到有人會顯示紅色標記，且可佔用其方格。是靜態畫面，不是即時影像。',
     'zh-Hans': '最新一张 Home Assistant 摄像头画面（Blink、Reolink、ONVIF…），每分钟刷新，并标出画面是多久前的；配合运动传感器时，检测到有人会显示红色标记，并可占用其格子。是静态画面，不是实时视频。',
   },
@@ -106,32 +107,32 @@ export const camera = defineWidget({
     entity: t.string({
       choices: { source: SOURCE, list: 'cameras' },
       placeholder: 'camera.porch',
-      label: { en: 'Camera', es: 'Cámara', 'zh-Hant': '攝影機', 'zh-Hans': '摄像头' },
-      help: { en: 'Its id in Home Assistant: camera.something.', es: 'Su id en Home Assistant: camera.algo.', 'zh-Hant': '它在 Home Assistant 中的 id：camera.something。', 'zh-Hans': '它在 Home Assistant 中的 id：camera.something。' },
+      label: { en: 'Camera', es: 'Cámara', de: 'Kamera', 'zh-Hant': '攝影機', 'zh-Hans': '摄像头' },
+      help: { en: 'Its id in Home Assistant: camera.something.', es: 'Su id en Home Assistant: camera.algo.', de: 'Ihre ID in Home Assistant: camera.irgendwas.', 'zh-Hant': '它在 Home Assistant 中的 id：camera.something。', 'zh-Hans': '它在 Home Assistant 中的 id：camera.something。' },
     }),
-    name: t.string({ label: { en: 'Name', es: 'Nombre', 'zh-Hant': '名稱', 'zh-Hans': '名称' }, help: { en: 'Empty = the name in Home Assistant.', es: 'Vacío = el nombre en Home Assistant.', 'zh-Hant': '留空 = 使用 Home Assistant 中的名稱。', 'zh-Hans': '留空 = 使用 Home Assistant 中的名称。' } }),
-    showName: t.boolean({ default: true, label: { en: 'Show the name', es: 'Mostrar el nombre', 'zh-Hant': '顯示名稱', 'zh-Hans': '显示名称' } }),
-    showAge: t.boolean({ default: true, label: { en: 'Show how old the picture is', es: 'Mostrar la antigüedad de la imagen', 'zh-Hant': '顯示畫面是多久前的', 'zh-Hans': '显示画面是多久前的' }, help: { en: 'Since the picture last changed. A battery camera (Blink) only takes a new one on motion or when asked.', es: 'Desde que cambió la imagen por última vez. Una cámara de batería (Blink) solo hace otra con movimiento o cuando se le pide.', 'zh-Hant': '自畫面上次變更起算。電池供電的攝影機（Blink）只有偵測到動作或收到要求時才會拍新畫面。', 'zh-Hans': '从画面上次变化起算。电池供电的摄像头（Blink）只在检测到运动或收到请求时才拍新画面。' } }),
+    name: t.string({ label: { en: 'Name', es: 'Nombre', de: 'Name', 'zh-Hant': '名稱', 'zh-Hans': '名称' }, help: { en: 'Empty = the name in Home Assistant.', es: 'Vacío = el nombre en Home Assistant.', de: 'Leer = der Name in Home Assistant.', 'zh-Hant': '留空 = 使用 Home Assistant 中的名稱。', 'zh-Hans': '留空 = 使用 Home Assistant 中的名称。' } }),
+    showName: t.boolean({ default: true, label: { en: 'Show the name', es: 'Mostrar el nombre', de: 'Namen anzeigen', 'zh-Hant': '顯示名稱', 'zh-Hans': '显示名称' } }),
+    showAge: t.boolean({ default: true, label: { en: 'Show how old the picture is', es: 'Mostrar la antigüedad de la imagen', de: 'Alter des Bildes anzeigen', 'zh-Hant': '顯示畫面是多久前的', 'zh-Hans': '显示画面是多久前的' }, help: { en: 'Since the picture last changed. A battery camera (Blink) only takes a new one on motion or when asked.', es: 'Desde que cambió la imagen por última vez. Una cámara de batería (Blink) solo hace otra con movimiento o cuando se le pide.', de: 'Seit sich das Bild zuletzt geändert hat. Eine Akku-Kamera (Blink) macht nur bei Bewegung oder auf Anfrage ein neues.', 'zh-Hant': '自畫面上次變更起算。電池供電的攝影機（Blink）只有偵測到動作或收到要求時才會拍新畫面。', 'zh-Hans': '从画面上次变化起算。电池供电的摄像头（Blink）只在检测到运动或收到请求时才拍新画面。' } }),
     motion: t.string({
       choices: { source: SOURCE, list: 'motion' },
       placeholder: 'binary_sensor.porch_motion',
-      label: { en: 'Motion sensor', es: 'Sensor de movimiento', 'zh-Hant': '動作感測器', 'zh-Hans': '运动传感器' },
-      help: { en: 'Empty = binary_sensor.<camera>_motion if there is one (Blink names them so).', es: 'Vacío = binary_sensor.<cámara>_motion si existe (Blink los llama así).', 'zh-Hant': '留空 = binary_sensor.<camera>_motion（若有的話；Blink 就是這樣命名）。', 'zh-Hans': '留空 = binary_sensor.<camera>_motion（如果有的话；Blink 就是这样命名的）。' },
+      label: { en: 'Motion sensor', es: 'Sensor de movimiento', de: 'Bewegungssensor', 'zh-Hant': '動作感測器', 'zh-Hans': '运动传感器' },
+      help: { en: 'Empty = binary_sensor.<camera>_motion if there is one (Blink names them so).', es: 'Vacío = binary_sensor.<cámara>_motion si existe (Blink los llama así).', de: 'Leer = binary_sensor.<kamera>_motion, falls vorhanden (so benennt Blink sie).', 'zh-Hant': '留空 = binary_sensor.<camera>_motion（若有的話；Blink 就是這樣命名）。', 'zh-Hans': '留空 = binary_sensor.<camera>_motion（如果有的话；Blink 就是这样命名的）。' },
     }),
     doorbell: t.string({
       choices: { source: SOURCE, list: 'doorbells' },
       placeholder: 'event.front_door_ding',
-      label: { en: 'Doorbell', es: 'Timbre', 'zh-Hant': '門鈴', 'zh-Hans': '门铃' },
-      help: { en: 'An event entity (event.*) or a binary sensor: for a minute after it rings, a mark on the picture, and the camera takes the tile if allowed.', es: 'Una entidad de evento (event.*) o un sensor binario: durante un minuto tras sonar, una marca en la imagen, y la cámara se queda con la tesela si se le deja.', 'zh-Hant': '事件實體（event.*）或二元感測器：響鈴後一分鐘內，畫面上會顯示標記；若允許，攝影機會佔用方格。', 'zh-Hans': '事件实体（event.*）或二元传感器：响铃后一分钟内，画面上会显示标记；若允许，摄像头会占用格子。' },
+      label: { en: 'Doorbell', es: 'Timbre', de: 'Türklingel', 'zh-Hant': '門鈴', 'zh-Hans': '门铃' },
+      help: { en: 'An event entity (event.*) or a binary sensor: for a minute after it rings, a mark on the picture, and the camera takes the tile if allowed.', es: 'Una entidad de evento (event.*) o un sensor binario: durante un minuto tras sonar, una marca en la imagen, y la cámara se queda con la tesela si se le deja.', de: 'Eine Ereignis-Entität (event.*) oder ein Binärsensor: eine Minute nach dem Klingeln eine Markierung auf dem Bild, und die Kamera übernimmt die Kachel, wenn erlaubt.', 'zh-Hant': '事件實體（event.*）或二元感測器：響鈴後一分鐘內，畫面上會顯示標記；若允許，攝影機會佔用方格。', 'zh-Hans': '事件实体（event.*）或二元传感器：响铃后一分钟内，画面上会显示标记；若允许，摄像头会占用格子。' },
     }),
-    fit: t.enum(['cover', 'contain'] as const, { label: { en: 'Fit', es: 'Ajuste', 'zh-Hant': '縮放', 'zh-Hans': '缩放' }, labels: { cover: { en: 'Fill (crop)', es: 'Llenar (recorta)', 'zh-Hant': '填滿（裁切）', 'zh-Hans': '填充（裁剪）' }, contain: { en: 'Whole picture', es: 'Imagen entera', 'zh-Hant': '完整畫面', 'zh-Hans': '完整画面' } } }),
+    fit: t.enum(['cover', 'contain'] as const, { label: { en: 'Fit', es: 'Ajuste', de: 'Einpassen', 'zh-Hant': '縮放', 'zh-Hans': '缩放' }, labels: { cover: { en: 'Fill (crop)', es: 'Llenar (recorta)', de: 'Füllen (beschneiden)', 'zh-Hant': '填滿（裁切）', 'zh-Hans': '填充（裁剪）' }, contain: { en: 'Whole picture', es: 'Imagen entera', de: 'Ganzes Bild', 'zh-Hant': '完整畫面', 'zh-Hans': '完整画面' } } }),
     keep: t.enum(['center', 'top', 'bottom'] as const, {
       advanced: true,
-      label: { en: 'Keep in view', es: 'Mantener a la vista', 'zh-Hant': '優先保留', 'zh-Hans': '优先保留' },
-      labels: { center: { en: 'The centre', es: 'El centro', 'zh-Hant': '中間', 'zh-Hans': '中间' }, top: { en: 'The top', es: 'La parte de arriba', 'zh-Hant': '上方', 'zh-Hans': '上方' }, bottom: { en: 'The bottom', es: 'La parte de abajo', 'zh-Hant': '下方', 'zh-Hans': '下方' } },
-      help: { en: 'What filling crops last: the sky or the ground.', es: 'Lo último que recorta al llenar: el cielo o el suelo.', 'zh-Hant': '填滿時最後才裁掉的部分：天空或地面。', 'zh-Hans': '填充时最后才裁掉的部分：天空或地面。' },
+      label: { en: 'Keep in view', es: 'Mantener a la vista', de: 'Im Blick behalten', 'zh-Hant': '優先保留', 'zh-Hans': '优先保留' },
+      labels: { center: { en: 'The centre', es: 'El centro', de: 'Mitte', 'zh-Hant': '中間', 'zh-Hans': '中间' }, top: { en: 'The top', es: 'La parte de arriba', de: 'Oben', 'zh-Hant': '上方', 'zh-Hans': '上方' }, bottom: { en: 'The bottom', es: 'La parte de abajo', de: 'Unten', 'zh-Hant': '下方', 'zh-Hans': '下方' } },
+      help: { en: 'What filling crops last: the sky or the ground.', es: 'Lo último que recorta al llenar: el cielo o el suelo.', de: 'Was beim Füllen zuletzt abgeschnitten wird: der Himmel oder der Boden.', 'zh-Hant': '填滿時最後才裁掉的部分：天空或地面。', 'zh-Hans': '填充时最后才裁掉的部分：天空或地面。' },
     }),
-    dim: t.integer({ default: 0, min: 0, max: 90, step: 5, unit: '%', slider: true, advanced: true, label: { en: 'Darken', es: 'Oscurecer', 'zh-Hant': '調暗', 'zh-Hans': '调暗' }, help: { en: 'Keeps a bright picture from outshining everything else.', es: 'Para que una imagen clara no deslumbre al resto.', 'zh-Hant': '避免明亮的畫面蓋過其他內容。', 'zh-Hans': '避免明亮的画面盖过其他内容。' } }),
+    dim: t.integer({ default: 0, min: 0, max: 90, step: 5, unit: '%', slider: true, advanced: true, label: { en: 'Darken', es: 'Oscurecer', de: 'Abdunkeln', 'zh-Hant': '調暗', 'zh-Hans': '调暗' }, help: { en: 'Keeps a bright picture from outshining everything else.', es: 'Para que una imagen clara no deslumbre al resto.', de: 'Damit ein helles Bild nicht alles andere überstrahlt.', 'zh-Hant': '避免明亮的畫面蓋過其他內容。', 'zh-Hans': '避免明亮的画面盖过其他内容。' } }),
   }),
   intervalMs: 60_000,
   // Until the connection has the camera, look again soon: the first picture shouldn't wait a minute.
@@ -196,7 +197,7 @@ export const camera = defineWidget({
       age: options.showAge && data.changedAt ? ctx.fmt.ago(data.changedAt) : '',
       motion: motion?.state === 'on',
       ring: !!d && ringing(options.doorbell ? d.entities[options.doorbell] : undefined, ctx.now),
-      stale: stale ? (e?.state === 'unavailable' ? tr({ en: 'camera unavailable', es: 'cámara no disponible', 'zh-Hant': '攝影機無法使用', 'zh-Hans': '摄像头不可用' }) : tr({ en: 'offline', es: 'sin conexión', 'zh-Hant': '離線', 'zh-Hans': '离线' })) : '',
+      stale: stale ? (e?.state === 'unavailable' ? tr({ en: 'camera unavailable', es: 'cámara no disponible', de: 'Kamera nicht verfügbar', 'zh-Hant': '攝影機無法使用', 'zh-Hans': '摄像头不可用' }) : tr({ en: 'offline', es: 'sin conexión', de: 'offline', 'zh-Hant': '離線', 'zh-Hans': '离线' })) : '',
     });
   },
   demo: ({ now, locale }) => ({
@@ -208,12 +209,12 @@ export const camera = defineWidget({
 
 /** Why there is no picture yet, and what to do about it. */
 function why(d: HaData | undefined, data: CameraData | undefined, entity: string, tr: RenderContext<unknown, unknown>['t']): [string, string?] {
-  if (d?.state === 'unconfigured') return [tr({ en: 'Home Assistant not set up', es: 'Home Assistant sin configurar', 'zh-Hant': 'Home Assistant 尚未設定', 'zh-Hans': 'Home Assistant 尚未设置' }), tr({ en: 'Set its address and a token in Settings → Data sources', es: 'Pon su dirección y un token en Ajustes → Fuentes de datos', 'zh-Hant': '請在「設定 → 資料來源」中填入其網址和權杖', 'zh-Hans': '请在“设置 → 数据源”中填写其网址和令牌' })];
-  if (!entity || data?.state === 'pick') return [tr({ en: 'Choose a camera', es: 'Elige una cámara', 'zh-Hant': '選擇攝影機', 'zh-Hans': '选择摄像头' }), tr({ en: 'In the inspector: one of your Home Assistant cameras, e.g. camera.porch', es: 'En el inspector: una de las cámaras de tu Home Assistant, p. ej. camera.porch', 'zh-Hant': '在檢查器中：你的某台 Home Assistant 攝影機，例如 camera.porch', 'zh-Hans': '在检查器中：你的某个 Home Assistant 摄像头，例如 camera.porch' })];
-  if (d?.state === 'error' && !Object.keys(d.entities).length) return [tr({ en: 'Home Assistant unreachable', es: 'Home Assistant no responde', 'zh-Hant': 'Home Assistant 無法連線', 'zh-Hans': 'Home Assistant 无法连接' }), errorHint(d.error, tr)];
-  if (data?.state === 'missing') return [tr({ en: 'Camera not found', es: 'Cámara no encontrada', 'zh-Hant': '找不到攝影機', 'zh-Hans': '找不到摄像头' }), entity];
-  if (data?.state === 'nopicture') return [tr({ en: 'This camera has no picture', es: 'Esta cámara no tiene imagen', 'zh-Hant': '這台攝影機沒有畫面', 'zh-Hans': '这个摄像头没有画面' }), tr({ en: 'It may be off, or not a camera', es: 'Puede que esté apagada, o que no sea una cámara', 'zh-Hant': '可能已關閉，或不是攝影機', 'zh-Hans': '可能已关闭，或不是摄像头' })];
-  return [tr({ en: 'Waiting for the camera…', es: 'Esperando a la cámara…', 'zh-Hant': '正在等待攝影機…', 'zh-Hans': '正在等待摄像头…' })];
+  if (d?.state === 'unconfigured') return [tr({ en: 'Home Assistant not set up', es: 'Home Assistant sin configurar', de: 'Home Assistant nicht eingerichtet', 'zh-Hant': 'Home Assistant 尚未設定', 'zh-Hans': 'Home Assistant 尚未设置' }), tr({ en: 'Set its address and a token in Settings → Data sources', es: 'Pon su dirección y un token en Ajustes → Fuentes de datos', de: 'Adresse und Token unter Einstellungen → Datenquellen eintragen', 'zh-Hant': '請在「設定 → 資料來源」中填入其網址和權杖', 'zh-Hans': '请在“设置 → 数据源”中填写其网址和令牌' })];
+  if (!entity || data?.state === 'pick') return [tr({ en: 'Choose a camera', es: 'Elige una cámara', de: 'Kamera wählen', 'zh-Hant': '選擇攝影機', 'zh-Hans': '选择摄像头' }), tr({ en: 'In the inspector: one of your Home Assistant cameras, e.g. camera.porch', es: 'En el inspector: una de las cámaras de tu Home Assistant, p. ej. camera.porch', de: 'Im Inspektor: eine deiner Home-Assistant-Kameras, z. B. camera.porch', 'zh-Hant': '在檢查器中：你的某台 Home Assistant 攝影機，例如 camera.porch', 'zh-Hans': '在检查器中：你的某个 Home Assistant 摄像头，例如 camera.porch' })];
+  if (d?.state === 'error' && !Object.keys(d.entities).length) return [tr({ en: 'Home Assistant unreachable', es: 'Home Assistant no responde', de: 'Home Assistant nicht erreichbar', 'zh-Hant': 'Home Assistant 無法連線', 'zh-Hans': 'Home Assistant 无法连接' }), errorHint(d.error, tr)];
+  if (data?.state === 'missing') return [tr({ en: 'Camera not found', es: 'Cámara no encontrada', de: 'Kamera nicht gefunden', 'zh-Hant': '找不到攝影機', 'zh-Hans': '找不到摄像头' }), entity];
+  if (data?.state === 'nopicture') return [tr({ en: 'This camera has no picture', es: 'Esta cámara no tiene imagen', de: 'Diese Kamera hat kein Bild', 'zh-Hant': '這台攝影機沒有畫面', 'zh-Hans': '这个摄像头没有画面' }), tr({ en: 'It may be off, or not a camera', es: 'Puede que esté apagada, o que no sea una cámara', de: 'Vielleicht ist sie aus oder keine Kamera', 'zh-Hant': '可能已關閉，或不是攝影機', 'zh-Hans': '可能已关闭，或不是摄像头' })];
+  return [tr({ en: 'Waiting for the camera…', es: 'Esperando a la cámara…', de: 'Warte auf die Kamera…', 'zh-Hant': '正在等待攝影機…', 'zh-Hans': '正在等待摄像头…' })];
 }
 
 /** The text over the picture: name and age at the bottom on a shade, motion and trouble at the top. */
@@ -257,8 +258,8 @@ function overlay(g: Graphics, ctx: RenderContext<unknown, unknown>, o: { name: s
     kit.drawTracked(g, text, x + ps * (dot ? 1.55 : 0.7), y + h / 2 + ps * 0.36, { size: ps, family: fonts.sansBold, color: dot ? '#fff' : color });
     x += w + ps * 0.5;
   };
-  if (o.ring) pill(ctx.t({ en: 'Doorbell', es: 'Llaman', 'zh-Hant': '門鈴', 'zh-Hans': '门铃' }), colors.warn, true);
-  if (o.motion) pill(ctx.t({ en: 'Motion', es: 'Movimiento', 'zh-Hant': '有動靜', 'zh-Hans': '有动静' }), colors.alert, true);
+  if (o.ring) pill(ctx.t({ en: 'Doorbell', es: 'Llaman', de: 'Klingel', 'zh-Hant': '門鈴', 'zh-Hans': '门铃' }), colors.warn, true);
+  if (o.motion) pill(ctx.t({ en: 'Motion', es: 'Movimiento', de: 'Bewegung', 'zh-Hant': '有動靜', 'zh-Hans': '有动静' }), colors.alert, true);
   if (o.motion || o.ring) {
     g.strokeStyle = o.motion ? colors.alert : colors.warn;
     g.lineWidth = Math.max(2, Math.round(s * 0.18));
