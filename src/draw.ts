@@ -41,6 +41,22 @@ export function drawMessage(g: Graphics, box: Box, { theme, kit }: Pick<Ctx, 'th
 }
 
 /** A filled triangle pointing up (rising) or down, sitting on the text baseline `y`. */
+/**
+ * The hint under "Home Assistant unreachable": what the user can fix, in
+ * their language (a refused token); any other error as it came.
+ */
+export function errorHint(error: string | undefined, tr: Ctx['t']): string | undefined {
+  if (error?.startsWith('token refused')) {
+    return tr({
+      en: 'Token refused: create a long-lived access token in Home Assistant and set it in Settings → Data sources',
+      es: 'Token rechazado: crea un token de acceso de larga duración en Home Assistant y ponlo en Ajustes → Fuentes de datos',
+      'zh-Hant': '權杖遭拒：請在 Home Assistant 中建立長期存取權杖，並填入「設定 → 資料來源」',
+      'zh-Hans': '令牌被拒绝：请在 Home Assistant 中创建长期访问令牌，并填写到“设置 → 数据源”',
+    });
+  }
+  return error;
+}
+
 export function drawTrend(g: Graphics, x: number, y: number, size: number, up: boolean, color: string): void {
   const w = size * 0.62, h = size * 0.5, top = y - size * 0.62;
   g.fillStyle = color;

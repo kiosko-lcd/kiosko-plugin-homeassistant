@@ -83,10 +83,12 @@ const IDLE_W = 10;
 
 export const energy = defineWidget({
   id: 'energy',
-  name: { en: 'Energy flow', es: 'Flujo de energía' },
+  name: { en: 'Energy flow', es: 'Flujo de energía', 'zh-Hant': '能源流向', 'zh-Hans': '能源流向' },
   description: {
     en: 'Where the power comes from and goes, now: the grid, the solar panels and the battery around the house, a line for every flow (thicker the more it carries) and today\'s kWh from the Energy dashboard. A grid sensor is enough to start.',
     es: 'De dónde viene la energía y adónde va, ahora: la red, las placas y la batería alrededor de la casa, una línea por cada flujo (más gruesa cuanto más lleva) y los kWh de hoy del panel de Energía. Basta un sensor de la red para empezar.',
+    'zh-Hant': '電力現在從哪裡來、往哪裡去：房子周圍是電網、太陽能板和電池，每股流向一條線（流量越大越粗），以及能源儀表板中今天的 kWh。只要有電網感測器就能開始。',
+    'zh-Hans': '电力现在从哪里来、到哪里去：房子周围是电网、太阳能板和电池，每股流向一条线（流量越大越粗），以及能源仪表盘中今天的 kWh。只需一个电网传感器即可开始。',
   },
   icon: 'zap',
   category: 'info',
@@ -97,28 +99,28 @@ export const energy = defineWidget({
     grid: t.string({
       choices: { source: SOURCE, list: 'power' },
       placeholder: 'sensor.grid_power',
-      label: { en: 'Grid power', es: 'Potencia de la red' },
-      help: { en: 'W or kW, positive while buying. Empty = the one in the Energy dashboard.', es: 'W o kW, positiva al comprar. Vacío = la del panel de Energía.' },
+      label: { en: 'Grid power', es: 'Potencia de la red', 'zh-Hant': '電網功率', 'zh-Hans': '电网功率' },
+      help: { en: 'W or kW, positive while buying. Empty = the one in the Energy dashboard.', es: 'W o kW, positiva al comprar. Vacío = la del panel de Energía.', 'zh-Hant': 'W 或 kW，買電時為正。留空 = 使用能源儀表板中的設定。', 'zh-Hans': 'W 或 kW，买电时为正。留空 = 使用能源仪表盘中的设置。' },
     }),
-    gridExportPositive: t.boolean({ label: { en: 'The grid sensor is positive while selling', es: 'El sensor de la red es positivo al vender' } }),
-    solar: t.string({ choices: { source: SOURCE, list: 'power' }, placeholder: 'sensor.solar_power', label: { en: 'Solar power', es: 'Potencia solar' }, help: { en: 'Empty = the one in the Energy dashboard, or none.', es: 'Vacío = la del panel de Energía, o ninguna.' } }),
-    battery: t.string({ choices: { source: SOURCE, list: 'power' }, placeholder: 'sensor.battery_power', label: { en: 'Battery power', es: 'Potencia de la batería' }, help: { en: 'Positive while discharging. Empty = the one in the Energy dashboard, or none.', es: 'Positiva al descargar. Vacío = la del panel de Energía, o ninguna.' } }),
-    batteryChargePositive: t.boolean({ label: { en: 'The battery sensor is positive while charging', es: 'El sensor de la batería es positivo al cargar' } }),
-    batteryLevel: t.string({ choices: { source: SOURCE, list: 'entities' }, placeholder: 'sensor.battery_state_of_charge', label: { en: 'Battery level', es: 'Nivel de la batería' }, help: { en: 'Its %, shown in the battery.', es: 'Su %, que se ve en la batería.' } }),
-    showToday: t.boolean({ default: true, label: { en: "Today's energy", es: 'La energía de hoy' }, help: { en: 'From the Energy dashboard, under each part.', es: 'Del panel de Energía, bajo cada parte.' } }),
-    moving: t.boolean({ default: true, label: { en: 'Moving dots', es: 'Puntos en movimiento' }, help: { en: 'Repaints the tile every second.', es: 'Vuelve a pintar la tesela cada segundo.' } }),
+    gridExportPositive: t.boolean({ label: { en: 'The grid sensor is positive while selling', es: 'El sensor de la red es positivo al vender', 'zh-Hant': '電網感測器在賣電時為正', 'zh-Hans': '电网传感器在卖电时为正' } }),
+    solar: t.string({ choices: { source: SOURCE, list: 'power' }, placeholder: 'sensor.solar_power', label: { en: 'Solar power', es: 'Potencia solar', 'zh-Hant': '太陽能功率', 'zh-Hans': '太阳能功率' }, help: { en: 'Empty = the one in the Energy dashboard, or none.', es: 'Vacío = la del panel de Energía, o ninguna.', 'zh-Hant': '留空 = 使用能源儀表板中的設定，或不使用。', 'zh-Hans': '留空 = 使用能源仪表盘中的设置，或不使用。' } }),
+    battery: t.string({ choices: { source: SOURCE, list: 'power' }, placeholder: 'sensor.battery_power', label: { en: 'Battery power', es: 'Potencia de la batería', 'zh-Hant': '電池功率', 'zh-Hans': '电池功率' }, help: { en: 'Positive while discharging. Empty = the one in the Energy dashboard, or none.', es: 'Positiva al descargar. Vacío = la del panel de Energía, o ninguna.', 'zh-Hant': '放電時為正。留空 = 使用能源儀表板中的設定，或不使用。', 'zh-Hans': '放电时为正。留空 = 使用能源仪表盘中的设置，或不使用。' } }),
+    batteryChargePositive: t.boolean({ label: { en: 'The battery sensor is positive while charging', es: 'El sensor de la batería es positivo al cargar', 'zh-Hant': '電池感測器在充電時為正', 'zh-Hans': '电池传感器在充电时为正' } }),
+    batteryLevel: t.string({ choices: { source: SOURCE, list: 'entities' }, placeholder: 'sensor.battery_state_of_charge', label: { en: 'Battery level', es: 'Nivel de la batería', 'zh-Hant': '電池電量', 'zh-Hans': '电池电量' }, help: { en: 'Its %, shown in the battery.', es: 'Su %, que se ve en la batería.', 'zh-Hant': '其百分比，顯示在電池圖示中。', 'zh-Hans': '其百分比，显示在电池图标中。' } }),
+    showToday: t.boolean({ default: true, label: { en: "Today's energy", es: 'La energía de hoy', 'zh-Hant': "今天的電量", 'zh-Hans': "今天的电量" }, help: { en: 'From the Energy dashboard, under each part.', es: 'Del panel de Energía, bajo cada parte.', 'zh-Hant': '來自能源儀表板，顯示在各部分下方。', 'zh-Hans': '来自能源仪表盘，显示在各部分下方。' } }),
+    moving: t.boolean({ default: true, label: { en: 'Moving dots', es: 'Puntos en movimiento', 'zh-Hant': '流動光點', 'zh-Hans': '流动光点' }, help: { en: 'Repaints the tile every second.', es: 'Vuelve a pintar la tesela cada segundo.', 'zh-Hant': '每秒重繪方格一次。', 'zh-Hans': '每秒重绘格子一次。' } }),
   }),
   redraw: ({ options }) => (options.moving ? 'second' : 'minute'),
   render(g, ctx) {
     const { options, sources, t: tr, theme, locale } = ctx;
     const d = dataOf(sources);
     const box = ctx.box;
-    if (!d || d.state === 'unconfigured') return drawMessage(g, box, ctx, tr({ en: 'Home Assistant not set up', es: 'Home Assistant sin configurar' }), tr({ en: 'Set its address and a token in Settings → Data sources', es: 'Pon su dirección y un token en Ajustes → Fuentes de datos' }));
-    if (d.state === 'connecting') return drawMessage(g, box, ctx, tr({ en: 'Connecting to Home Assistant…', es: 'Conectando con Home Assistant…' }));
+    if (!d || d.state === 'unconfigured') return drawMessage(g, box, ctx, tr({ en: 'Home Assistant not set up', es: 'Home Assistant sin configurar', 'zh-Hant': 'Home Assistant 尚未設定', 'zh-Hans': 'Home Assistant 尚未设置' }), tr({ en: 'Set its address and a token in Settings → Data sources', es: 'Pon su dirección y un token en Ajustes → Fuentes de datos', 'zh-Hant': '請在「設定 → 資料來源」中填入其網址和權杖', 'zh-Hans': '请在“设置 → 数据源”中填写其网址和令牌' }));
+    if (d.state === 'connecting') return drawMessage(g, box, ctx, tr({ en: 'Connecting to Home Assistant…', es: 'Conectando con Home Assistant…', 'zh-Hant': '正在連線 Home Assistant…', 'zh-Hans': '正在连接 Home Assistant…' }));
     const ids = { grid: options.grid || d.energy?.power?.grid, solar: options.solar || d.energy?.power?.solar, battery: options.battery || d.energy?.power?.battery };
     const raw = { grid: watts(ids.grid ? d.entities[ids.grid] : undefined), solar: watts(ids.solar ? d.entities[ids.solar] : undefined), battery: watts(ids.battery ? d.entities[ids.battery] : undefined) };
     if (raw.grid === undefined && raw.solar === undefined && raw.battery === undefined) {
-      return drawMessage(g, box, ctx, tr({ en: 'Choose the power sensors', es: 'Elige los sensores de potencia' }), tr({ en: 'At least the grid one, in the inspector (or set them in the Energy dashboard of Home Assistant).', es: 'Al menos el de la red, en el inspector (o ponlos en el panel de Energía de Home Assistant).' }));
+      return drawMessage(g, box, ctx, tr({ en: 'Choose the power sensors', es: 'Elige los sensores de potencia', 'zh-Hant': '選擇功率感測器', 'zh-Hans': '选择功率传感器' }), tr({ en: 'At least the grid one, in the inspector (or set them in the Energy dashboard of Home Assistant).', es: 'Al menos el de la red, en el inspector (o ponlos en el panel de Energía de Home Assistant).', 'zh-Hant': '至少要有電網的，在檢查器中設定（或在 Home Assistant 的能源儀表板中設定）。', 'zh-Hans': '至少要有电网的，在检查器中设置（或在 Home Assistant 的能源仪表盘中设置）。' }));
     }
     const p: Powers = {
       ...(raw.grid !== undefined ? { grid: options.gridExportPositive ? -raw.grid : raw.grid } : {}),
@@ -250,7 +252,7 @@ export const energy = defineWidget({
 
     if (d.state !== 'ok') {
       const s = Math.max(10, Math.round(rowH * 0.8));
-      ctx.kit.drawTracked(g, tr({ en: 'offline', es: 'sin conexión' }), box.x + box.w, box.y + s, { size: s, family: theme.fonts.sans, color: theme.colors.warn, align: 'right' });
+      ctx.kit.drawTracked(g, tr({ en: 'offline', es: 'sin conexión', 'zh-Hant': '離線', 'zh-Hans': '离线' }), box.x + box.w, box.y + s, { size: s, family: theme.fonts.sans, color: theme.colors.warn, align: 'right' });
     }
   },
   demo: ({ now, locale }) => ({ sources: { [SOURCE]: demoHome(now, locale) }, options: { grid: 'sensor.grid_power', solar: 'sensor.solar_power', battery: 'sensor.battery_power', batteryLevel: 'sensor.battery_level' } }),

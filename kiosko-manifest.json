@@ -4,12 +4,16 @@
   "package": "kiosko-plugin-homeassistant",
   "name": {
     "en": "Home Assistant",
-    "es": "Home Assistant"
+    "es": "Home Assistant",
+    "zh-Hant": "Home Assistant",
+    "zh-Hans": "Home Assistant"
   },
   "version": "0.2.3",
   "description": {
     "en": "Home Assistant on the panel, live over its WebSocket API: any entity in big with its history, lists of entities, what needs you at home (doors left open, low batteries, leaks, the alarm), your cameras (with the doorbell), the energy flow, what's playing and who is home.",
-    "es": "Home Assistant en el panel, en directo por su API WebSocket: cualquier entidad en grande con su histórico, listas de entidades, lo que te necesita en casa (puertas abiertas, baterías bajas, fugas, la alarma), tus cámaras (con el timbre), el flujo de energía, lo que suena y quién está en casa."
+    "es": "Home Assistant en el panel, en directo por su API WebSocket: cualquier entidad en grande con su histórico, listas de entidades, lo que te necesita en casa (puertas abiertas, baterías bajas, fugas, la alarma), tus cámaras (con el timbre), el flujo de energía, lo que suena y quién está en casa.",
+    "zh-Hant": "在面板上顯示 Home Assistant，透過其 WebSocket API 即時更新：以大字顯示任一實體及其歷史、實體清單、家中需要你處理的事（沒關的門、電量低的電池、漏水、警報）、你的攝影機（含門鈴）、能源流向、正在播放的內容，以及誰在家。",
+    "zh-Hans": "在副屏上显示 Home Assistant，通过其 WebSocket API 实时更新：以大字显示任一实体及其历史、实体列表、家里需要你处理的事（没关的门、电量低的电池、漏水、警报）、你的摄像头（含门铃）、能源流向、正在播放的内容，以及谁在家。"
   },
   "author": "Loksly",
   "license": "MIT",
@@ -24,7 +28,9 @@
   ],
   "languages": [
     "en",
-    "es"
+    "es",
+    "zh-Hant",
+    "zh-Hans"
   ],
   "categories": [
     "info",
@@ -73,11 +79,15 @@
       "type": "homeassistant/entity",
       "name": {
         "en": "Entity",
-        "es": "Entidad"
+        "es": "Entidad",
+        "zh-Hant": "實體",
+        "zh-Hans": "实体"
       },
       "description": {
         "en": "One Home Assistant entity in big: a temperature, the power the house draws, a door, the thermostat. Numeric sensors can show their last hours as bars, and turn amber or red past thresholds of your own.",
-        "es": "Una entidad de Home Assistant en grande: una temperatura, lo que consume la casa, una puerta, el termostato. Los sensores numéricos pueden mostrar sus últimas horas en barras y ponerse en ámbar o rojo al pasar los umbrales que elijas."
+        "es": "Una entidad de Home Assistant en grande: una temperatura, lo que consume la casa, una puerta, el termostato. Los sensores numéricos pueden mostrar sus últimas horas en barras y ponerse en ámbar o rojo al pasar los umbrales que elijas.",
+        "zh-Hant": "以大字顯示一個 Home Assistant 實體：溫度、家中的用電功率、一扇門、溫控器。數值感測器可用長條顯示最近幾小時，超過你設定的門檻時會變成琥珀色或紅色。",
+        "zh-Hans": "以大字显示一个 Home Assistant 实体：温度、家里的用电功率、一扇门、温控器。数值传感器可用柱状图显示最近几小时，超过你设定的阈值时会变为琥珀色或红色。"
       },
       "icon": "gauge",
       "category": "info",
@@ -122,11 +132,15 @@
             "x-ui": {
               "label": {
                 "en": "Entity",
-                "es": "Entidad"
+                "es": "Entidad",
+                "zh-Hant": "實體",
+                "zh-Hans": "实体"
               },
               "help": {
                 "en": "Its id, as in Home Assistant → Settings → Devices & services → Entities.",
-                "es": "Su id, como en Home Assistant → Ajustes → Dispositivos y servicios → Entidades."
+                "es": "Su id, como en Home Assistant → Ajustes → Dispositivos y servicios → Entidades.",
+                "zh-Hant": "它的 id，即 Home Assistant → 設定 → 裝置與服務 → 實體中所列的。",
+                "zh-Hans": "它的 id，即 Home Assistant → 设置 → 设备与服务 → 实体中所列的。"
               },
               "placeholder": "sensor.living_room_temperature",
               "choices": {
@@ -143,11 +157,15 @@
             "x-ui": {
               "label": {
                 "en": "Name",
-                "es": "Nombre"
+                "es": "Nombre",
+                "zh-Hant": "名稱",
+                "zh-Hans": "名称"
               },
               "help": {
                 "en": "Empty = the name in Home Assistant.",
-                "es": "Vacío = el nombre en Home Assistant."
+                "es": "Vacío = el nombre en Home Assistant.",
+                "zh-Hant": "留空 = 使用 Home Assistant 中的名稱。",
+                "zh-Hans": "留空 = 使用 Home Assistant 中的名称。"
               }
             },
             "type": "string"
@@ -158,7 +176,9 @@
             "x-ui": {
               "label": {
                 "en": "Show the name",
-                "es": "Mostrar el nombre"
+                "es": "Mostrar el nombre",
+                "zh-Hant": "顯示名稱",
+                "zh-Hans": "显示名称"
               }
             },
             "type": "boolean"
@@ -170,11 +190,15 @@
             "x-ui": {
               "label": {
                 "en": "Show the history",
-                "es": "Mostrar el histórico"
+                "es": "Mostrar el histórico",
+                "zh-Hant": "顯示歷史",
+                "zh-Hans": "显示历史"
               },
               "help": {
                 "en": "Numeric sensors only, when the source keeps their history.",
-                "es": "Solo sensores numéricos cuyo histórico guarda la fuente."
+                "es": "Solo sensores numéricos cuyo histórico guarda la fuente.",
+                "zh-Hant": "僅限數值感測器，且資料來源有保留其歷史時。",
+                "zh-Hans": "仅限数值传感器，且数据源保留了其历史时。"
               }
             },
             "type": "boolean"
@@ -185,7 +209,9 @@
             "x-ui": {
               "label": {
                 "en": "History span",
-                "es": "Periodo del histórico"
+                "es": "Periodo del histórico",
+                "zh-Hant": "歷史範圍",
+                "zh-Hans": "历史范围"
               },
               "unit": "ms"
             },
@@ -200,11 +226,15 @@
             "x-ui": {
               "label": {
                 "en": "Decimals",
-                "es": "Decimales"
+                "es": "Decimales",
+                "zh-Hant": "小數位數",
+                "zh-Hans": "小数位数"
               },
               "help": {
                 "en": "-1 = automatic: fewer as the number grows.",
-                "es": "-1 = automático: menos cuanto mayor es el número."
+                "es": "-1 = automático: menos cuanto mayor es el número.",
+                "zh-Hant": "-1 = 自動：數字越大，小數位越少。",
+                "zh-Hans": "-1 = 自动：数字越大，小数位越少。"
               },
               "advanced": true
             },
@@ -218,20 +248,28 @@
             "x-ui": {
               "label": {
                 "en": "Thresholds",
-                "es": "Umbrales"
+                "es": "Umbrales",
+                "zh-Hant": "門檻",
+                "zh-Hans": "阈值"
               },
               "labels": {
                 "off": {
                   "en": "Off",
-                  "es": "No"
+                  "es": "No",
+                  "zh-Hant": "關閉",
+                  "zh-Hans": "关闭"
                 },
                 "above": {
                   "en": "Warn above",
-                  "es": "Avisar por encima"
+                  "es": "Avisar por encima",
+                  "zh-Hant": "高於時警告",
+                  "zh-Hans": "高于时警告"
                 },
                 "below": {
                   "en": "Warn below",
-                  "es": "Avisar por debajo"
+                  "es": "Avisar por debajo",
+                  "zh-Hant": "低於時警告",
+                  "zh-Hans": "低于时警告"
                 }
               }
             },
@@ -248,7 +286,9 @@
             "x-ui": {
               "label": {
                 "en": "Warning (amber) at",
-                "es": "Aviso (ámbar) en"
+                "es": "Aviso (ámbar) en",
+                "zh-Hant": "警告（琥珀色）門檻",
+                "zh-Hans": "警告（琥珀色）阈值"
               }
             },
             "type": "number",
@@ -262,11 +302,15 @@
             "x-ui": {
               "label": {
                 "en": "Alert (red) at",
-                "es": "Alerta (rojo) en"
+                "es": "Alerta (rojo) en",
+                "zh-Hant": "警報（紅色）門檻",
+                "zh-Hans": "告警（红色）阈值"
               },
               "help": {
                 "en": "Red, and the widget keeps its tile.",
-                "es": "Rojo, y el widget se queda con su tesela."
+                "es": "Rojo, y el widget se queda con su tesela.",
+                "zh-Hant": "紅色，且小工具會保有其方格。",
+                "zh-Hans": "红色，且小组件会保留其格子。"
               }
             },
             "type": "number",
@@ -283,11 +327,15 @@
       "type": "homeassistant/entities",
       "name": {
         "en": "Entities",
-        "es": "Entidades"
+        "es": "Entidades",
+        "zh-Hant": "實體",
+        "zh-Hans": "实体"
       },
       "description": {
         "en": "A list of Home Assistant entities and their states, picked by id or name with patterns (sensor.*_temperature, light.*). Open doors, low batteries and alarms are coloured; the rest stays quiet.",
-        "es": "Una lista de entidades de Home Assistant con sus estados, elegidas por id o nombre con patrones (sensor.*_temperature, light.*). Puertas abiertas, baterías bajas y alarmas llevan color; el resto, discreto."
+        "es": "Una lista de entidades de Home Assistant con sus estados, elegidas por id o nombre con patrones (sensor.*_temperature, light.*). Puertas abiertas, baterías bajas y alarmas llevan color; el resto, discreto.",
+        "zh-Hant": "一份 Home Assistant 實體及其狀態的清單，依 id 或名稱以萬用字元挑選（sensor.*_temperature, light.*）。開著的門、電量低的電池和警報會以顏色標示；其餘保持低調。",
+        "zh-Hans": "一个 Home Assistant 实体及其状态的列表，按 id 或名称用通配符挑选（sensor.*_temperature, light.*）。开着的门、电量低的电池和警报会用颜色标出；其余保持低调。"
       },
       "icon": "list",
       "category": "info",
@@ -330,11 +378,15 @@
             "x-ui": {
               "label": {
                 "en": "Rows",
-                "es": "Filas"
+                "es": "Filas",
+                "zh-Hant": "列數",
+                "zh-Hans": "行数"
               },
               "help": {
                 "en": "0 = as many as fit. A number shows that many, in rows of a readable size (fewer when the tile is too small for them); the rest are counted in \"+N more\".",
-                "es": "0 = las que quepan. Con un número se ven esas, en filas de un tamaño legible (menos si la tesela no da para ellas); el resto se cuenta en «+N más»."
+                "es": "0 = las que quepan. Con un número se ven esas, en filas de un tamaño legible (menos si la tesela no da para ellas); el resto se cuenta en «+N más».",
+                "zh-Hant": "0 = 盡量放滿。填數字則顯示該數量，並以易讀的大小排列（方格太小時會減少）；其餘的計入「還有 N 個」。",
+                "zh-Hans": "0 = 尽量放满。填数字则显示该数量，并以易读的大小排列（格子太小时会减少）；其余的计入“还有 N 个”。"
               }
             },
             "type": "integer",
@@ -348,24 +400,34 @@
             "x-ui": {
               "label": {
                 "en": "Row layout",
-                "es": "Formato de fila"
+                "es": "Formato de fila",
+                "zh-Hant": "列版面",
+                "zh-Hans": "行布局"
               },
               "help": {
                 "en": "Automatic: the widget picks by the tile's shape.",
-                "es": "Automático: el widget elige según la forma de la tesela."
+                "es": "Automático: el widget elige según la forma de la tesela.",
+                "zh-Hant": "自動：小工具依方格形狀選擇。",
+                "zh-Hans": "自动：小组件根据格子形状选择。"
               },
               "labels": {
                 "auto": {
                   "en": "Automatic",
-                  "es": "Automático"
+                  "es": "Automático",
+                  "zh-Hant": "自動",
+                  "zh-Hans": "自动"
                 },
                 "one-line": {
                   "en": "One line",
-                  "es": "Una línea"
+                  "es": "Una línea",
+                  "zh-Hant": "單行",
+                  "zh-Hans": "单行"
                 },
                 "detailed": {
                   "en": "Detailed",
-                  "es": "Detallado"
+                  "es": "Detallado",
+                  "zh-Hant": "詳細",
+                  "zh-Hans": "详细"
                 }
               }
             },
@@ -383,11 +445,15 @@
             "x-ui": {
               "label": {
                 "en": "Entities",
-                "es": "Entidades"
+                "es": "Entidades",
+                "zh-Hant": "實體",
+                "zh-Hans": "实体"
               },
               "help": {
                 "en": "Ids or names, in the order to list them: sensor.*_temperature, light.*, *kitchen*, !light.porch. Empty = all.",
-                "es": "Ids o nombres, en el orden en que listarlas: sensor.*_temperature, light.*, *cocina*, !light.porch. Vacío = todas."
+                "es": "Ids o nombres, en el orden en que listarlas: sensor.*_temperature, light.*, *cocina*, !light.porch. Vacío = todas.",
+                "zh-Hant": "id 或名稱，依列出的順序：sensor.*_temperature, light.*, *kitchen*, !light.porch。留空 = 全部。",
+                "zh-Hans": "id 或名称，按列出的顺序：sensor.*_temperature, light.*, *kitchen*, !light.porch。留空 = 全部。"
               },
               "widget": "filter",
               "choices": {
@@ -416,11 +482,15 @@
             "x-ui": {
               "label": {
                 "en": "Only what is on, open or wrong",
-                "es": "Solo lo encendido, abierto o con problemas"
+                "es": "Solo lo encendido, abierto o con problemas",
+                "zh-Hant": "只顯示開著或異常的",
+                "zh-Hans": "只显示开着或异常的"
               },
               "help": {
                 "en": "Leaves out what is off or closed. Numbers always stay.",
-                "es": "Deja fuera lo apagado o cerrado. Los números se quedan siempre."
+                "es": "Deja fuera lo apagado o cerrado. Los números se quedan siempre.",
+                "zh-Hant": "略過已關閉或關上的項目。數值一律保留。",
+                "zh-Hans": "略过已关闭或关上的项目。数值始终保留。"
               }
             },
             "type": "boolean"
@@ -431,7 +501,9 @@
             "x-ui": {
               "label": {
                 "en": "Hide unavailable entities",
-                "es": "Ocultar las entidades no disponibles"
+                "es": "Ocultar las entidades no disponibles",
+                "zh-Hant": "隱藏無法使用的實體",
+                "zh-Hans": "隐藏不可用的实体"
               }
             },
             "type": "boolean"
@@ -443,11 +515,15 @@
             "x-ui": {
               "label": {
                 "en": "Decimals",
-                "es": "Decimales"
+                "es": "Decimales",
+                "zh-Hant": "小數位數",
+                "zh-Hans": "小数位数"
               },
               "help": {
                 "en": "-1 = automatic.",
-                "es": "-1 = automático."
+                "es": "-1 = automático.",
+                "zh-Hant": "-1 = 自動。",
+                "zh-Hans": "-1 = 自动。"
               },
               "advanced": true
             },
@@ -461,7 +537,9 @@
             "x-ui": {
               "label": {
                 "en": "Battery warning at",
-                "es": "Batería en aviso desde"
+                "es": "Batería en aviso desde",
+                "zh-Hant": "電池警告門檻",
+                "zh-Hans": "电池警告阈值"
               },
               "advanced": true,
               "unit": "%"
@@ -476,7 +554,9 @@
             "x-ui": {
               "label": {
                 "en": "Battery alert at",
-                "es": "Batería en alerta desde"
+                "es": "Batería en alerta desde",
+                "zh-Hant": "電池警報門檻",
+                "zh-Hans": "电池告警阈值"
               },
               "advanced": true,
               "unit": "%"
@@ -495,11 +575,15 @@
       "type": "homeassistant/attention",
       "name": {
         "en": "Home: needs you",
-        "es": "Casa: te necesita"
+        "es": "Casa: te necesita",
+        "zh-Hant": "居家：需要你處理",
+        "zh-Hans": "家里：需要你处理"
       },
       "description": {
         "en": "Only what needs you at home: smoke, a leak or the alarm in red (and it keeps its tile until they stop), then doors and windows left open, unlocked locks, low batteries and problems. Hides itself when all is well.",
-        "es": "Solo lo que te necesita en casa: humo, una fuga o la alarma en rojo (y se queda con su tesela hasta que paren), luego puertas y ventanas abiertas, cerraduras sin cerrar, baterías bajas y problemas. Se oculta cuando todo va bien."
+        "es": "Solo lo que te necesita en casa: humo, una fuga o la alarma en rojo (y se queda con su tesela hasta que paren), luego puertas y ventanas abiertas, cerraduras sin cerrar, baterías bajas y problemas. Se oculta cuando todo va bien.",
+        "zh-Hant": "只顯示家中需要你處理的事：煙霧、漏水或警報觸發（紅色，且會一直保有其方格直到解除），接著是沒關的門窗、未上鎖的鎖、電量低的電池和異常。一切正常時會自動隱藏。",
+        "zh-Hans": "只显示家里需要你处理的事：烟雾、漏水或警报触发（红色，并会一直占用其格子直到解除），然后是没关的门窗、未上锁的锁、电量低的电池和异常。一切正常时会自动隐藏。"
       },
       "icon": "shield-alert",
       "category": "info",
@@ -546,11 +630,15 @@
             "x-ui": {
               "label": {
                 "en": "Rows",
-                "es": "Filas"
+                "es": "Filas",
+                "zh-Hant": "列數",
+                "zh-Hans": "行数"
               },
               "help": {
                 "en": "0 = as many as fit. A number shows that many, in rows of a readable size (fewer when the tile is too small for them); the rest are counted in \"+N more\".",
-                "es": "0 = las que quepan. Con un número se ven esas, en filas de un tamaño legible (menos si la tesela no da para ellas); el resto se cuenta en «+N más»."
+                "es": "0 = las que quepan. Con un número se ven esas, en filas de un tamaño legible (menos si la tesela no da para ellas); el resto se cuenta en «+N más».",
+                "zh-Hant": "0 = 盡量放滿。填數字則顯示該數量，並以易讀的大小排列（方格太小時會減少）；其餘的計入「還有 N 個」。",
+                "zh-Hans": "0 = 尽量放满。填数字则显示该数量，并以易读的大小排列（格子太小时会减少）；其余的计入“还有 N 个”。"
               }
             },
             "type": "integer",
@@ -564,24 +652,34 @@
             "x-ui": {
               "label": {
                 "en": "Row layout",
-                "es": "Formato de fila"
+                "es": "Formato de fila",
+                "zh-Hant": "列版面",
+                "zh-Hans": "行布局"
               },
               "help": {
                 "en": "Automatic: the widget picks by the tile's shape.",
-                "es": "Automático: el widget elige según la forma de la tesela."
+                "es": "Automático: el widget elige según la forma de la tesela.",
+                "zh-Hant": "自動：小工具依方格形狀選擇。",
+                "zh-Hans": "自动：小组件根据格子形状选择。"
               },
               "labels": {
                 "auto": {
                   "en": "Automatic",
-                  "es": "Automático"
+                  "es": "Automático",
+                  "zh-Hant": "自動",
+                  "zh-Hans": "自动"
                 },
                 "one-line": {
                   "en": "One line",
-                  "es": "Una línea"
+                  "es": "Una línea",
+                  "zh-Hant": "單行",
+                  "zh-Hans": "单行"
                 },
                 "detailed": {
                   "en": "Detailed",
-                  "es": "Detallado"
+                  "es": "Detallado",
+                  "zh-Hant": "詳細",
+                  "zh-Hans": "详细"
                 }
               }
             },
@@ -599,11 +697,15 @@
             "x-ui": {
               "label": {
                 "en": "Entities",
-                "es": "Entidades"
+                "es": "Entidades",
+                "zh-Hant": "實體",
+                "zh-Hans": "实体"
               },
               "help": {
                 "en": "Empty = all. Leave out the ones that are fine open with !: !binary_sensor.patio_door.",
-                "es": "Vacío = todas. Deja fuera con ! las que pueden estar abiertas: !binary_sensor.patio_door."
+                "es": "Vacío = todas. Deja fuera con ! las que pueden estar abiertas: !binary_sensor.patio_door.",
+                "zh-Hant": "留空 = 全部。可以開著的，用 ! 排除：!binary_sensor.patio_door。",
+                "zh-Hans": "留空 = 全部。可以开着的，用 ! 排除：!binary_sensor.patio_door。"
               },
               "widget": "filter",
               "choices": {
@@ -632,11 +734,15 @@
             "x-ui": {
               "label": {
                 "en": "Doors, windows and locks",
-                "es": "Puertas, ventanas y cerraduras"
+                "es": "Puertas, ventanas y cerraduras",
+                "zh-Hant": "門、窗和鎖",
+                "zh-Hans": "门、窗和锁"
               },
               "help": {
                 "en": "Open doors, windows, garage doors and gates; unlocked locks.",
-                "es": "Puertas, ventanas, garajes y cancelas abiertas; cerraduras sin cerrar."
+                "es": "Puertas, ventanas, garajes y cancelas abiertas; cerraduras sin cerrar.",
+                "zh-Hant": "開著的門、窗、車庫門和大門；未上鎖的鎖。",
+                "zh-Hans": "开着的门、窗、车库门和大门；未上锁的锁。"
               }
             },
             "type": "boolean"
@@ -648,11 +754,15 @@
             "x-ui": {
               "label": {
                 "en": "Open for at least",
-                "es": "Abierta al menos"
+                "es": "Abierta al menos",
+                "zh-Hant": "已開啟至少",
+                "zh-Hans": "已打开至少"
               },
               "help": {
                 "en": "A door counts once it has been open this long. 0 = at once.",
-                "es": "Una puerta cuenta cuando lleva abierta este tiempo. 0 = al momento."
+                "es": "Una puerta cuenta cuando lleva abierta este tiempo. 0 = al momento.",
+                "zh-Hant": "門開著這麼久之後才算數。0 = 立即。",
+                "zh-Hans": "门开着这么久之后才算。0 = 立即。"
               },
               "unit": "ms"
             },
@@ -665,7 +775,9 @@
             "x-ui": {
               "label": {
                 "en": "Low batteries",
-                "es": "Baterías bajas"
+                "es": "Baterías bajas",
+                "zh-Hant": "電量低的電池",
+                "zh-Hans": "电量低的电池"
               }
             },
             "type": "boolean"
@@ -677,11 +789,15 @@
             "x-ui": {
               "label": {
                 "en": "Problems",
-                "es": "Problemas"
+                "es": "Problemas",
+                "zh-Hant": "異常",
+                "zh-Hans": "异常"
               },
               "help": {
                 "en": "Problem and tamper sensors, lost connections, a vacuum in error.",
-                "es": "Sensores de problema y manipulación, conexiones perdidas, un robot aspirador en error."
+                "es": "Sensores de problema y manipulación, conexiones perdidas, un robot aspirador en error.",
+                "zh-Hant": "異常與防拆感測器、連線中斷、出錯的掃地機器人。",
+                "zh-Hans": "异常和防拆传感器、连接中断、出错的扫地机器人。"
               }
             },
             "type": "boolean"
@@ -692,7 +808,9 @@
             "x-ui": {
               "label": {
                 "en": "Unavailable devices",
-                "es": "Dispositivos no disponibles"
+                "es": "Dispositivos no disponibles",
+                "zh-Hant": "無法使用的裝置",
+                "zh-Hans": "不可用的设备"
               }
             },
             "type": "boolean"
@@ -703,7 +821,9 @@
             "x-ui": {
               "label": {
                 "en": "Updates available",
-                "es": "Actualizaciones disponibles"
+                "es": "Actualizaciones disponibles",
+                "zh-Hant": "有可用更新",
+                "zh-Hans": "有可用更新"
               }
             },
             "type": "boolean"
@@ -714,7 +834,9 @@
             "x-ui": {
               "label": {
                 "en": "Battery warning at",
-                "es": "Batería en aviso desde"
+                "es": "Batería en aviso desde",
+                "zh-Hant": "電池警告門檻",
+                "zh-Hans": "电池警告阈值"
               },
               "advanced": true,
               "unit": "%"
@@ -729,7 +851,9 @@
             "x-ui": {
               "label": {
                 "en": "Battery alert at",
-                "es": "Batería en alerta desde"
+                "es": "Batería en alerta desde",
+                "zh-Hant": "電池警報門檻",
+                "zh-Hans": "电池告警阈值"
               },
               "advanced": true,
               "unit": "%"
@@ -748,11 +872,15 @@
       "type": "homeassistant/camera",
       "name": {
         "en": "Camera",
-        "es": "Cámara"
+        "es": "Cámara",
+        "zh-Hant": "攝影機",
+        "zh-Hans": "摄像头"
       },
       "description": {
         "en": "The latest picture of a Home Assistant camera (Blink, Reolink, ONVIF…), refreshed every minute, with how old it is; with a motion sensor, a red mark while it sees someone, and it can take over its tile. A still, not live video.",
-        "es": "La última imagen de una cámara de Home Assistant (Blink, Reolink, ONVIF…), refrescada cada minuto, con su antigüedad; con un sensor de movimiento, una marca roja mientras ve a alguien, y puede quedarse con su tesela. Una foto, no vídeo en directo."
+        "es": "La última imagen de una cámara de Home Assistant (Blink, Reolink, ONVIF…), refrescada cada minuto, con su antigüedad; con un sensor de movimiento, una marca roja mientras ve a alguien, y puede quedarse con su tesela. Una foto, no vídeo en directo.",
+        "zh-Hant": "最新一張 Home Assistant 攝影機畫面（Blink、Reolink、ONVIF…），每分鐘重新整理，並標示畫面是多久前的；搭配動作感測器時，偵測到有人會顯示紅色標記，且可佔用其方格。是靜態畫面，不是即時影像。",
+        "zh-Hans": "最新一张 Home Assistant 摄像头画面（Blink、Reolink、ONVIF…），每分钟刷新，并标出画面是多久前的；配合运动传感器时，检测到有人会显示红色标记，并可占用其格子。是静态画面，不是实时视频。"
       },
       "icon": "cctv",
       "category": "media",
@@ -798,11 +926,15 @@
             "x-ui": {
               "label": {
                 "en": "Camera",
-                "es": "Cámara"
+                "es": "Cámara",
+                "zh-Hant": "攝影機",
+                "zh-Hans": "摄像头"
               },
               "help": {
                 "en": "Its id in Home Assistant: camera.something.",
-                "es": "Su id en Home Assistant: camera.algo."
+                "es": "Su id en Home Assistant: camera.algo.",
+                "zh-Hant": "它在 Home Assistant 中的 id：camera.something。",
+                "zh-Hans": "它在 Home Assistant 中的 id：camera.something。"
               },
               "placeholder": "camera.porch",
               "choices": {
@@ -819,11 +951,15 @@
             "x-ui": {
               "label": {
                 "en": "Name",
-                "es": "Nombre"
+                "es": "Nombre",
+                "zh-Hant": "名稱",
+                "zh-Hans": "名称"
               },
               "help": {
                 "en": "Empty = the name in Home Assistant.",
-                "es": "Vacío = el nombre en Home Assistant."
+                "es": "Vacío = el nombre en Home Assistant.",
+                "zh-Hant": "留空 = 使用 Home Assistant 中的名稱。",
+                "zh-Hans": "留空 = 使用 Home Assistant 中的名称。"
               }
             },
             "type": "string"
@@ -834,7 +970,9 @@
             "x-ui": {
               "label": {
                 "en": "Show the name",
-                "es": "Mostrar el nombre"
+                "es": "Mostrar el nombre",
+                "zh-Hant": "顯示名稱",
+                "zh-Hans": "显示名称"
               }
             },
             "type": "boolean"
@@ -846,11 +984,15 @@
             "x-ui": {
               "label": {
                 "en": "Show how old the picture is",
-                "es": "Mostrar la antigüedad de la imagen"
+                "es": "Mostrar la antigüedad de la imagen",
+                "zh-Hant": "顯示畫面是多久前的",
+                "zh-Hans": "显示画面是多久前的"
               },
               "help": {
                 "en": "Since the picture last changed. A battery camera (Blink) only takes a new one on motion or when asked.",
-                "es": "Desde que cambió la imagen por última vez. Una cámara de batería (Blink) solo hace otra con movimiento o cuando se le pide."
+                "es": "Desde que cambió la imagen por última vez. Una cámara de batería (Blink) solo hace otra con movimiento o cuando se le pide.",
+                "zh-Hant": "自畫面上次變更起算。電池供電的攝影機（Blink）只有偵測到動作或收到要求時才會拍新畫面。",
+                "zh-Hans": "从画面上次变化起算。电池供电的摄像头（Blink）只在检测到运动或收到请求时才拍新画面。"
               }
             },
             "type": "boolean"
@@ -862,11 +1004,15 @@
             "x-ui": {
               "label": {
                 "en": "Motion sensor",
-                "es": "Sensor de movimiento"
+                "es": "Sensor de movimiento",
+                "zh-Hant": "動作感測器",
+                "zh-Hans": "运动传感器"
               },
               "help": {
                 "en": "Empty = binary_sensor.<camera>_motion if there is one (Blink names them so).",
-                "es": "Vacío = binary_sensor.<cámara>_motion si existe (Blink los llama así)."
+                "es": "Vacío = binary_sensor.<cámara>_motion si existe (Blink los llama así).",
+                "zh-Hant": "留空 = binary_sensor.<camera>_motion（若有的話；Blink 就是這樣命名）。",
+                "zh-Hans": "留空 = binary_sensor.<camera>_motion（如果有的话；Blink 就是这样命名的）。"
               },
               "placeholder": "binary_sensor.porch_motion",
               "choices": {
@@ -883,11 +1029,15 @@
             "x-ui": {
               "label": {
                 "en": "Doorbell",
-                "es": "Timbre"
+                "es": "Timbre",
+                "zh-Hant": "門鈴",
+                "zh-Hans": "门铃"
               },
               "help": {
                 "en": "An event entity (event.*) or a binary sensor: for a minute after it rings, a mark on the picture, and the camera takes the tile if allowed.",
-                "es": "Una entidad de evento (event.*) o un sensor binario: durante un minuto tras sonar, una marca en la imagen, y la cámara se queda con la tesela si se le deja."
+                "es": "Una entidad de evento (event.*) o un sensor binario: durante un minuto tras sonar, una marca en la imagen, y la cámara se queda con la tesela si se le deja.",
+                "zh-Hant": "事件實體（event.*）或二元感測器：響鈴後一分鐘內，畫面上會顯示標記；若允許，攝影機會佔用方格。",
+                "zh-Hans": "事件实体（event.*）或二元传感器：响铃后一分钟内，画面上会显示标记；若允许，摄像头会占用格子。"
               },
               "placeholder": "event.front_door_ding",
               "choices": {
@@ -903,16 +1053,22 @@
             "x-ui": {
               "label": {
                 "en": "Fit",
-                "es": "Ajuste"
+                "es": "Ajuste",
+                "zh-Hant": "縮放",
+                "zh-Hans": "缩放"
               },
               "labels": {
                 "cover": {
                   "en": "Fill (crop)",
-                  "es": "Llenar (recorta)"
+                  "es": "Llenar (recorta)",
+                  "zh-Hant": "填滿（裁切）",
+                  "zh-Hans": "填充（裁剪）"
                 },
                 "contain": {
                   "en": "Whole picture",
-                  "es": "Imagen entera"
+                  "es": "Imagen entera",
+                  "zh-Hant": "完整畫面",
+                  "zh-Hans": "完整画面"
                 }
               }
             },
@@ -929,25 +1085,35 @@
             "x-ui": {
               "label": {
                 "en": "Keep in view",
-                "es": "Mantener a la vista"
+                "es": "Mantener a la vista",
+                "zh-Hant": "優先保留",
+                "zh-Hans": "优先保留"
               },
               "help": {
                 "en": "What filling crops last: the sky or the ground.",
-                "es": "Lo último que recorta al llenar: el cielo o el suelo."
+                "es": "Lo último que recorta al llenar: el cielo o el suelo.",
+                "zh-Hant": "填滿時最後才裁掉的部分：天空或地面。",
+                "zh-Hans": "填充时最后才裁掉的部分：天空或地面。"
               },
               "advanced": true,
               "labels": {
                 "center": {
                   "en": "The centre",
-                  "es": "El centro"
+                  "es": "El centro",
+                  "zh-Hant": "中間",
+                  "zh-Hans": "中间"
                 },
                 "top": {
                   "en": "The top",
-                  "es": "La parte de arriba"
+                  "es": "La parte de arriba",
+                  "zh-Hant": "上方",
+                  "zh-Hans": "上方"
                 },
                 "bottom": {
                   "en": "The bottom",
-                  "es": "La parte de abajo"
+                  "es": "La parte de abajo",
+                  "zh-Hant": "下方",
+                  "zh-Hans": "下方"
                 }
               }
             },
@@ -965,11 +1131,15 @@
             "x-ui": {
               "label": {
                 "en": "Darken",
-                "es": "Oscurecer"
+                "es": "Oscurecer",
+                "zh-Hant": "調暗",
+                "zh-Hans": "调暗"
               },
               "help": {
                 "en": "Keeps a bright picture from outshining everything else.",
-                "es": "Para que una imagen clara no deslumbre al resto."
+                "es": "Para que una imagen clara no deslumbre al resto.",
+                "zh-Hant": "避免明亮的畫面蓋過其他內容。",
+                "zh-Hans": "避免明亮的画面盖过其他内容。"
               },
               "advanced": true,
               "unit": "%",
@@ -990,11 +1160,15 @@
       "type": "homeassistant/energy",
       "name": {
         "en": "Energy flow",
-        "es": "Flujo de energía"
+        "es": "Flujo de energía",
+        "zh-Hant": "能源流向",
+        "zh-Hans": "能源流向"
       },
       "description": {
         "en": "Where the power comes from and goes, now: the grid, the solar panels and the battery around the house, a line for every flow (thicker the more it carries) and today's kWh from the Energy dashboard. A grid sensor is enough to start.",
-        "es": "De dónde viene la energía y adónde va, ahora: la red, las placas y la batería alrededor de la casa, una línea por cada flujo (más gruesa cuanto más lleva) y los kWh de hoy del panel de Energía. Basta un sensor de la red para empezar."
+        "es": "De dónde viene la energía y adónde va, ahora: la red, las placas y la batería alrededor de la casa, una línea por cada flujo (más gruesa cuanto más lleva) y los kWh de hoy del panel de Energía. Basta un sensor de la red para empezar.",
+        "zh-Hant": "電力現在從哪裡來、往哪裡去：房子周圍是電網、太陽能板和電池，每股流向一條線（流量越大越粗），以及能源儀表板中今天的 kWh。只要有電網感測器就能開始。",
+        "zh-Hans": "电力现在从哪里来、到哪里去：房子周围是电网、太阳能板和电池，每股流向一条线（流量越大越粗），以及能源仪表盘中今天的 kWh。只需一个电网传感器即可开始。"
       },
       "icon": "zap",
       "category": "info",
@@ -1039,11 +1213,15 @@
             "x-ui": {
               "label": {
                 "en": "Grid power",
-                "es": "Potencia de la red"
+                "es": "Potencia de la red",
+                "zh-Hant": "電網功率",
+                "zh-Hans": "电网功率"
               },
               "help": {
                 "en": "W or kW, positive while buying. Empty = the one in the Energy dashboard.",
-                "es": "W o kW, positiva al comprar. Vacío = la del panel de Energía."
+                "es": "W o kW, positiva al comprar. Vacío = la del panel de Energía.",
+                "zh-Hant": "W 或 kW，買電時為正。留空 = 使用能源儀表板中的設定。",
+                "zh-Hans": "W 或 kW，买电时为正。留空 = 使用能源仪表盘中的设置。"
               },
               "placeholder": "sensor.grid_power",
               "choices": {
@@ -1059,7 +1237,9 @@
             "x-ui": {
               "label": {
                 "en": "The grid sensor is positive while selling",
-                "es": "El sensor de la red es positivo al vender"
+                "es": "El sensor de la red es positivo al vender",
+                "zh-Hant": "電網感測器在賣電時為正",
+                "zh-Hans": "电网传感器在卖电时为正"
               }
             },
             "type": "boolean"
@@ -1071,11 +1251,15 @@
             "x-ui": {
               "label": {
                 "en": "Solar power",
-                "es": "Potencia solar"
+                "es": "Potencia solar",
+                "zh-Hant": "太陽能功率",
+                "zh-Hans": "太阳能功率"
               },
               "help": {
                 "en": "Empty = the one in the Energy dashboard, or none.",
-                "es": "Vacío = la del panel de Energía, o ninguna."
+                "es": "Vacío = la del panel de Energía, o ninguna.",
+                "zh-Hant": "留空 = 使用能源儀表板中的設定，或不使用。",
+                "zh-Hans": "留空 = 使用能源仪表盘中的设置，或不使用。"
               },
               "placeholder": "sensor.solar_power",
               "choices": {
@@ -1092,11 +1276,15 @@
             "x-ui": {
               "label": {
                 "en": "Battery power",
-                "es": "Potencia de la batería"
+                "es": "Potencia de la batería",
+                "zh-Hant": "電池功率",
+                "zh-Hans": "电池功率"
               },
               "help": {
                 "en": "Positive while discharging. Empty = the one in the Energy dashboard, or none.",
-                "es": "Positiva al descargar. Vacío = la del panel de Energía, o ninguna."
+                "es": "Positiva al descargar. Vacío = la del panel de Energía, o ninguna.",
+                "zh-Hant": "放電時為正。留空 = 使用能源儀表板中的設定，或不使用。",
+                "zh-Hans": "放电时为正。留空 = 使用能源仪表盘中的设置，或不使用。"
               },
               "placeholder": "sensor.battery_power",
               "choices": {
@@ -1112,7 +1300,9 @@
             "x-ui": {
               "label": {
                 "en": "The battery sensor is positive while charging",
-                "es": "El sensor de la batería es positivo al cargar"
+                "es": "El sensor de la batería es positivo al cargar",
+                "zh-Hant": "電池感測器在充電時為正",
+                "zh-Hans": "电池传感器在充电时为正"
               }
             },
             "type": "boolean"
@@ -1124,11 +1314,15 @@
             "x-ui": {
               "label": {
                 "en": "Battery level",
-                "es": "Nivel de la batería"
+                "es": "Nivel de la batería",
+                "zh-Hant": "電池電量",
+                "zh-Hans": "电池电量"
               },
               "help": {
                 "en": "Its %, shown in the battery.",
-                "es": "Su %, que se ve en la batería."
+                "es": "Su %, que se ve en la batería.",
+                "zh-Hant": "其百分比，顯示在電池圖示中。",
+                "zh-Hans": "其百分比，显示在电池图标中。"
               },
               "placeholder": "sensor.battery_state_of_charge",
               "choices": {
@@ -1145,11 +1339,15 @@
             "x-ui": {
               "label": {
                 "en": "Today's energy",
-                "es": "La energía de hoy"
+                "es": "La energía de hoy",
+                "zh-Hant": "今天的電量",
+                "zh-Hans": "今天的电量"
               },
               "help": {
                 "en": "From the Energy dashboard, under each part.",
-                "es": "Del panel de Energía, bajo cada parte."
+                "es": "Del panel de Energía, bajo cada parte.",
+                "zh-Hant": "來自能源儀表板，顯示在各部分下方。",
+                "zh-Hans": "来自能源仪表盘，显示在各部分下方。"
               }
             },
             "type": "boolean"
@@ -1161,11 +1359,15 @@
             "x-ui": {
               "label": {
                 "en": "Moving dots",
-                "es": "Puntos en movimiento"
+                "es": "Puntos en movimiento",
+                "zh-Hant": "流動光點",
+                "zh-Hans": "流动光点"
               },
               "help": {
                 "en": "Repaints the tile every second.",
-                "es": "Vuelve a pintar la tesela cada segundo."
+                "es": "Vuelve a pintar la tesela cada segundo.",
+                "zh-Hant": "每秒重繪方格一次。",
+                "zh-Hans": "每秒重绘格子一次。"
               }
             },
             "type": "boolean"
@@ -1180,11 +1382,15 @@
       "type": "homeassistant/media",
       "name": {
         "en": "Now playing",
-        "es": "Lo que suena"
+        "es": "Lo que suena",
+        "zh-Hant": "正在播放",
+        "zh-Hans": "正在播放"
       },
       "description": {
         "en": "What a Home Assistant media player is playing (the TV, Spotify on a speaker, a Chromecast, Sonos…): cover, title, artist, the app and how far it has got. Of several, the one playing. Hides itself while nothing plays.",
-        "es": "Lo que reproduce un media player de Home Assistant (la tele, Spotify en un altavoz, un Chromecast, Sonos…): carátula, título, artista, la app y por dónde va. De varios, el que suena. Se oculta mientras no suena nada."
+        "es": "Lo que reproduce un media player de Home Assistant (la tele, Spotify en un altavoz, un Chromecast, Sonos…): carátula, título, artista, la app y por dónde va. De varios, el que suena. Se oculta mientras no suena nada.",
+        "zh-Hant": "Home Assistant 媒體播放器正在播放的內容（電視、喇叭上的 Spotify、Chromecast、Sonos…）：封面、標題、演出者、應用程式和播放進度。有多台時，顯示正在播放的那台。沒有播放時會自動隱藏。",
+        "zh-Hans": "Home Assistant 媒体播放器正在播放的内容（电视、音箱上的 Spotify、Chromecast、Sonos…）：封面、标题、艺人、应用和播放进度。有多个时，显示正在播放的那个。没有播放时会自动隐藏。"
       },
       "icon": "music",
       "category": "media",
@@ -1224,11 +1430,15 @@
             "x-ui": {
               "label": {
                 "en": "Player",
-                "es": "Reproductor"
+                "es": "Reproductor",
+                "zh-Hant": "播放器",
+                "zh-Hans": "播放器"
               },
               "help": {
                 "en": "One, or several with patterns (media_player.*, !media_player.kitchen): the one playing is shown. Empty = all.",
-                "es": "Uno, o varios con patrones (media_player.*, !media_player.cocina): se ve el que suena. Vacío = todos."
+                "es": "Uno, o varios con patrones (media_player.*, !media_player.cocina): se ve el que suena. Vacío = todos.",
+                "zh-Hant": "一台，或用萬用字元指定多台（media_player.*, !media_player.kitchen）：顯示正在播放的那台。留空 = 全部。",
+                "zh-Hans": "一个，或用通配符指定多个（media_player.*, !media_player.kitchen）：显示正在播放的那个。留空 = 全部。"
               },
               "placeholder": "media_player.living_room",
               "choices": {
@@ -1244,7 +1454,9 @@
             "x-ui": {
               "label": {
                 "en": "Show the cover",
-                "es": "Mostrar la carátula"
+                "es": "Mostrar la carátula",
+                "zh-Hant": "顯示封面",
+                "zh-Hans": "显示封面"
               }
             },
             "type": "boolean"
@@ -1255,7 +1467,9 @@
             "x-ui": {
               "label": {
                 "en": "Show how far it has got",
-                "es": "Mostrar por dónde va"
+                "es": "Mostrar por dónde va",
+                "zh-Hant": "顯示播放進度",
+                "zh-Hans": "显示播放进度"
               }
             },
             "type": "boolean"
@@ -1270,11 +1484,15 @@
       "type": "homeassistant/people",
       "name": {
         "en": "Who is home",
-        "es": "Quién está en casa"
+        "es": "Quién está en casa",
+        "zh-Hant": "誰在家",
+        "zh-Hans": "谁在家"
       },
       "description": {
         "en": "The people Home Assistant knows, with their photo: at home, away or in a zone of yours (Work, School), and since when.",
-        "es": "Las personas que conoce Home Assistant, con su foto: en casa, fuera o en una de tus zonas (Trabajo, Colegio), y desde cuándo."
+        "es": "Las personas que conoce Home Assistant, con su foto: en casa, fuera o en una de tus zonas (Trabajo, Colegio), y desde cuándo.",
+        "zh-Hant": "Home Assistant 認得的人及其照片：在家、外出或在你的某個區域（公司、學校），以及從何時開始。",
+        "zh-Hans": "Home Assistant 知道的人员及其照片：在家、外出或在你的某个区域（公司、学校），以及从何时开始。"
       },
       "icon": "users",
       "category": "info",
@@ -1313,11 +1531,15 @@
             "x-ui": {
               "label": {
                 "en": "People",
-                "es": "Personas"
+                "es": "Personas",
+                "zh-Hant": "人員",
+                "zh-Hans": "人员"
               },
               "help": {
                 "en": "In this order. Empty = everyone.",
-                "es": "En este orden. Vacío = todas."
+                "es": "En este orden. Vacío = todas.",
+                "zh-Hant": "依此順序。留空 = 所有人。",
+                "zh-Hans": "按此顺序。留空 = 所有人。"
               },
               "widget": "filter",
               "choices": {
@@ -1345,7 +1567,9 @@
             "x-ui": {
               "label": {
                 "en": "Since when",
-                "es": "Desde cuándo"
+                "es": "Desde cuándo",
+                "zh-Hant": "自何時起",
+                "zh-Hans": "从何时起"
               }
             },
             "type": "boolean"
@@ -1356,7 +1580,9 @@
             "x-ui": {
               "label": {
                 "en": "Who is home first",
-                "es": "Primero quien está en casa"
+                "es": "Primero quien está en casa",
+                "zh-Hant": "在家的人優先",
+                "zh-Hans": "在家的人优先"
               }
             },
             "type": "boolean"
@@ -1373,11 +1599,15 @@
       "type": "homeassistant/states",
       "name": {
         "en": "Home Assistant",
-        "es": "Home Assistant"
+        "es": "Home Assistant",
+        "zh-Hant": "Home Assistant",
+        "zh-Hans": "Home Assistant"
       },
       "description": {
         "en": "The states of your Home Assistant entities, live over its WebSocket API (a change shows at once), and the last day of the numeric sensors for the history bars.",
-        "es": "Los estados de las entidades de tu Home Assistant, en directo por su API WebSocket (un cambio se ve al momento), y el último día de los sensores numéricos para las barras de histórico."
+        "es": "Los estados de las entidades de tu Home Assistant, en directo por su API WebSocket (un cambio se ve al momento), y el último día de los sensores numéricos para las barras de histórico.",
+        "zh-Hant": "你的 Home Assistant 實體狀態，透過其 WebSocket API 即時取得（變更會立即顯示），以及數值感測器最近一天的資料，供歷史長條使用。",
+        "zh-Hans": "你的 Home Assistant 实体状态，通过其 WebSocket API 实时获取（变化会立即显示），以及数值传感器最近一天的数据，用于历史柱状图。"
       },
       "polled": false,
       "options": {
@@ -1398,11 +1628,15 @@
             "x-ui": {
               "label": {
                 "en": "Home Assistant address",
-                "es": "Dirección de Home Assistant"
+                "es": "Dirección de Home Assistant",
+                "zh-Hant": "Home Assistant 網址",
+                "zh-Hans": "Home Assistant 网址"
               },
               "help": {
                 "en": "The one you open in the browser, e.g. http://homeassistant.local:8123 or https://home.example.com.",
-                "es": "La que abres en el navegador, p. ej. http://homeassistant.local:8123 o https://casa.example.com."
+                "es": "La que abres en el navegador, p. ej. http://homeassistant.local:8123 o https://casa.example.com.",
+                "zh-Hant": "你在瀏覽器中開啟的網址，例如 http://homeassistant.local:8123 或 https://home.example.com。",
+                "zh-Hans": "你在浏览器中打开的网址，例如 http://homeassistant.local:8123 或 https://home.example.com。"
               },
               "placeholder": "http://homeassistant.local:8123",
               "format": "url"
@@ -1417,11 +1651,15 @@
             "x-ui": {
               "label": {
                 "en": "Long-lived access token",
-                "es": "Token de acceso de larga duración"
+                "es": "Token de acceso de larga duración",
+                "zh-Hant": "長期存取權杖",
+                "zh-Hans": "长期访问令牌"
               },
               "help": {
                 "en": "In Home Assistant: your profile → Security → Long-lived access tokens → Create token. A user that is not an administrator is enough.",
-                "es": "En Home Assistant: tu perfil → Seguridad → Tokens de acceso de larga duración → Crear token. Basta un usuario que no sea administrador."
+                "es": "En Home Assistant: tu perfil → Seguridad → Tokens de acceso de larga duración → Crear token. Basta un usuario que no sea administrador.",
+                "zh-Hant": "在 Home Assistant 中：你的個人資料 → 安全性 → 長期存取權杖 → 建立權杖。非管理員使用者即可。",
+                "zh-Hans": "在 Home Assistant 中：你的个人资料 → 安全 → 长期访问令牌 → 创建令牌。非管理员用户即可。"
               },
               "secret": true
             },
@@ -1435,11 +1673,15 @@
             "x-ui": {
               "label": {
                 "en": "Entities to read",
-                "es": "Entidades que leer"
+                "es": "Entidades que leer",
+                "zh-Hant": "要讀取的實體",
+                "zh-Hans": "要读取的实体"
               },
               "help": {
                 "en": "Empty = all. Ids or names, with * and !: sensor.*, binary_sensor.*, lock.*, !sensor.*_linkquality.",
-                "es": "Vacío = todas. Ids o nombres, con * y !: sensor.*, binary_sensor.*, lock.*, !sensor.*_linkquality."
+                "es": "Vacío = todas. Ids o nombres, con * y !: sensor.*, binary_sensor.*, lock.*, !sensor.*_linkquality.",
+                "zh-Hant": "留空 = 全部。填 id 或名稱，可用 * 和 !：sensor.*, binary_sensor.*, lock.*, !sensor.*_linkquality。",
+                "zh-Hans": "留空 = 全部。填 id 或名称，支持 * 和 !：sensor.*, binary_sensor.*, lock.*, !sensor.*_linkquality。"
               },
               "widget": "filter"
             },
@@ -1460,11 +1702,15 @@
             "x-ui": {
               "label": {
                 "en": "Entities with history",
-                "es": "Entidades con histórico"
+                "es": "Entidades con histórico",
+                "zh-Hant": "保留歷史的實體",
+                "zh-Hans": "保留历史的实体"
               },
               "help": {
                 "en": "Numeric sensors whose last day is kept for the history bars. Empty = every one with a unit.",
-                "es": "Sensores numéricos de los que se guarda el último día para las barras de histórico. Vacío = todos los que tienen unidad."
+                "es": "Sensores numéricos de los que se guarda el último día para las barras de histórico. Vacío = todos los que tienen unidad.",
+                "zh-Hant": "保留最近一天資料、用於歷史長條的數值感測器。留空 = 所有有單位的感測器。",
+                "zh-Hans": "保留最近一天数据、用于历史柱状图的数值传感器。留空 = 所有带单位的传感器。"
               },
               "advanced": true,
               "widget": "filter"
@@ -1486,11 +1732,15 @@
             "x-ui": {
               "label": {
                 "en": "Most entities with history",
-                "es": "Máximo de entidades con histórico"
+                "es": "Máximo de entidades con histórico",
+                "zh-Hant": "保留歷史的實體上限",
+                "zh-Hans": "保留历史的实体上限"
               },
               "help": {
                 "en": "Each costs a day of five-minute averages in memory (about 300 numbers). 0 = no history.",
-                "es": "Cada una ocupa un día de medias de cinco minutos en memoria (unos 300 números). 0 = sin histórico."
+                "es": "Cada una ocupa un día de medias de cinco minutos en memoria (unos 300 números). 0 = sin histórico.",
+                "zh-Hant": "每個實體會在記憶體中佔用一天的五分鐘平均值（約 300 個數字）。0 = 不保留歷史。",
+                "zh-Hans": "每个实体会在内存中占用一天的五分钟平均值（约 300 个数字）。0 = 不保留历史。"
               },
               "advanced": true
             },

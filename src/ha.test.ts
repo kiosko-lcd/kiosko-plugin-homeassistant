@@ -51,6 +51,9 @@ test('stateText says the state as a person would', () => {
   assert.equal(stateText(ent('sensor.h', '48', { unit: '%' }), es), '48 %');
   assert.equal(stateText(ent('binary_sensor.d', 'on', { deviceClass: 'door' }), en), 'Open');
   assert.equal(stateText(ent('binary_sensor.d', 'off', { deviceClass: 'window' }), es), 'Cerrada');
+  // A state, not an action: 已打开, not 打开.
+  assert.equal(stateText(ent('binary_sensor.d', 'on', { deviceClass: 'door' }), ctx('zh-CN')), '已打开');
+  assert.equal(stateText(ent('cover.garage', 'closed'), ctx('zh-TW')), '已關閉');
   assert.equal(stateText(ent('binary_sensor.m', 'on', { deviceClass: 'motion' }), en), 'Motion');
   assert.equal(stateText(ent('binary_sensor.x', 'on'), en), 'On');
   assert.equal(stateText(ent('lock.front', 'unlocked'), en), 'Unlocked');
@@ -133,7 +136,7 @@ test('notices: dangers first, then the oldest; toggles and openMs', () => {
   // Dangers stay whatever the toggles say; the filter leaves out.
   assert.deepEqual(ids({ includeOpenings: false, includeBatteries: false, includeProblems: false }), ['binary_sensor.leak']);
   assert.ok(!ids({ entities: ['!binary_sensor.balcony'] }).includes('binary_sensor.balcony'));
-  assert.deepEqual(noticeOf(ent('sensor.remote_battery', '7', { deviceClass: 'battery' }), attn(), NOW)?.what, { en: 'Battery 7 %', es: 'Batería 7 %' });
+  assert.deepEqual(noticeOf(ent('sensor.remote_battery', '7', { deviceClass: 'battery' }), attn(), NOW)?.what, { en: 'Battery 7 %', es: 'Batería 7 %', 'zh-Hant': '電池 7 %', 'zh-Hans': '电池 7 %' });
 });
 
 test('History: five-minute means, the last value held, trimmed to the span', () => {
@@ -193,4 +196,11 @@ test('demo: a believable home, its states where its history ends', () => {
   const t = d.entities['sensor.living_room_temperature']!;
   const v = d.history!.values(t.id, NOW, 3_600_000, 4);
   assert.ok(Math.abs(v.at(-1)! - Number(t.state)) < 0.1);
+});
+
+test('a refused token is a hint the user reads in their language; other errors as they came', async () => {
+  const { errorHint } = await import('./draw.ts');
+  assert.match(errorHint('token refused: invalid', ctx('zh-TW').t)!, /^權杖遭拒/);
+  assert.match(errorHint('token refused', ctx('es').t)!, /^Token rechazado/);
+  assert.equal(errorHint('cannot reach Home Assistant', ctx('zh-CN').t), 'cannot reach Home Assistant');
 });
