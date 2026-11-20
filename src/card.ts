@@ -121,7 +121,7 @@ function renderNumber(g: Graphics, ctx: Ctx, e: Entity, data: HaData, box: Box):
     const hour = history.values(e.id, now, 3_600_000, 12).filter((v) => Number.isFinite(v));
     const delta = hour.length >= 2 ? n - hour[0]! : 0;
     const shown = formatNumber(Math.abs(delta), locale, dec, n);
-    if (Number(shown.replace(',', '.').replace(/[^\d.]/g, '')) > 0) trend = { up: delta > 0, text: `${shown}${isTemperature(unit) ? '°' : unit ? ` ${unit}` : ''} · ${tr({ en: '1 h', es: '1 h', 'zh-Hant': '1 h', 'zh-Hans': '1 h' })}` };
+    if (Number(shown.replace(',', '.').replace(/[^\d.]/g, '')) > 0) trend = { up: delta > 0, text: `${shown}${isTemperature(unit) ? '°' : unit ? ` ${unit}` : ''} · ${ctx.fmt.duration(3_600_000, { compact: true })}` };
   }
 
   const hs = headerSize(box);

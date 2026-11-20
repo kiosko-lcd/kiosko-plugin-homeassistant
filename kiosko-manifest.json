@@ -13,7 +13,7 @@
     "en": "Home Assistant on the panel, live over its WebSocket API: any entity in big with its history, lists of entities, what needs you at home (doors left open, low batteries, leaks, the alarm), your cameras (with the doorbell), the energy flow, what's playing and who is home.",
     "es": "Home Assistant en el panel, en directo por su API WebSocket: cualquier entidad en grande con su histórico, listas de entidades, lo que te necesita en casa (puertas abiertas, baterías bajas, fugas, la alarma), tus cámaras (con el timbre), el flujo de energía, lo que suena y quién está en casa.",
     "zh-Hant": "在面板上顯示 Home Assistant，透過其 WebSocket API 即時更新：以大字顯示任一實體及其歷史、實體清單、家中需要你處理的事（沒關的門、電量低的電池、漏水、警報）、你的攝影機（含門鈴）、能源流向、正在播放的內容，以及誰在家。",
-    "zh-Hans": "在屏幕上显示 Home Assistant，通过其 WebSocket API 实时更新：以大字显示任一实体及其历史、实体列表、家里需要你处理的事（没关的门、电量低的电池、漏水、警报）、你的摄像头（含门铃）、能源流向、正在播放的内容，以及谁在家。"
+    "zh-Hans": "在副屏上显示 Home Assistant，通过其 WebSocket API 实时更新：以大字显示任一实体及其历史、实体列表、家里需要你处理的事（没关的门、电量低的电池、漏水、警报）、你的摄像头（含门铃）、能源流向、正在播放的内容，以及谁在家。"
   },
   "author": "Loksly",
   "license": "MIT",
@@ -483,8 +483,8 @@
               "label": {
                 "en": "Only what is on, open or wrong",
                 "es": "Solo lo encendido, abierto o con problemas",
-                "zh-Hant": "只顯示開著、開啟或異常的",
-                "zh-Hans": "只显示开着、打开或异常的"
+                "zh-Hant": "只顯示開著或異常的",
+                "zh-Hans": "只显示开着或异常的"
               },
               "help": {
                 "en": "Leaves out what is off or closed. Numbers always stay.",
@@ -755,14 +755,14 @@
               "label": {
                 "en": "Open for at least",
                 "es": "Abierta al menos",
-                "zh-Hant": "至少開啟",
-                "zh-Hans": "至少打开"
+                "zh-Hant": "已開啟至少",
+                "zh-Hans": "已打开至少"
               },
               "help": {
                 "en": "A door counts once it has been open this long. 0 = at once.",
                 "es": "Una puerta cuenta cuando lleva abierta este tiempo. 0 = al momento.",
-                "zh-Hant": "門開啟這麼久之後才算數。0 = 立即。",
-                "zh-Hans": "门打开这么久之后才算。0 = 立即。"
+                "zh-Hant": "門開著這麼久之後才算數。0 = 立即。",
+                "zh-Hans": "门开着这么久之后才算。0 = 立即。"
               },
               "unit": "ms"
             },

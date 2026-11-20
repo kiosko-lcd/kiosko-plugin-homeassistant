@@ -13,7 +13,7 @@
  */
 import { createHash } from 'node:crypto';
 import { defineWidget, t, type Box, type Graphics, type Image, type RenderContext } from '@kiosko/sdk';
-import { drawMessage } from './draw.ts';
+import { drawMessage, errorHint } from './draw.ts';
 import { demoHome, type Entity, type HaData } from './ha.ts';
 
 const SOURCE = 'homeassistant/states';
@@ -210,7 +210,7 @@ export const camera = defineWidget({
 function why(d: HaData | undefined, data: CameraData | undefined, entity: string, tr: RenderContext<unknown, unknown>['t']): [string, string?] {
   if (d?.state === 'unconfigured') return [tr({ en: 'Home Assistant not set up', es: 'Home Assistant sin configurar', 'zh-Hant': 'Home Assistant 尚未設定', 'zh-Hans': 'Home Assistant 尚未设置' }), tr({ en: 'Set its address and a token in Settings → Data sources', es: 'Pon su dirección y un token en Ajustes → Fuentes de datos', 'zh-Hant': '請在「設定 → 資料來源」中填入其網址和權杖', 'zh-Hans': '请在“设置 → 数据源”中填写其网址和令牌' })];
   if (!entity || data?.state === 'pick') return [tr({ en: 'Choose a camera', es: 'Elige una cámara', 'zh-Hant': '選擇攝影機', 'zh-Hans': '选择摄像头' }), tr({ en: 'In the inspector: one of your Home Assistant cameras, e.g. camera.porch', es: 'En el inspector: una de las cámaras de tu Home Assistant, p. ej. camera.porch', 'zh-Hant': '在檢查器中：你的某台 Home Assistant 攝影機，例如 camera.porch', 'zh-Hans': '在检查器中：你的某个 Home Assistant 摄像头，例如 camera.porch' })];
-  if (d?.state === 'error' && !Object.keys(d.entities).length) return [tr({ en: 'Home Assistant unreachable', es: 'Home Assistant no responde', 'zh-Hant': 'Home Assistant 無法連線', 'zh-Hans': 'Home Assistant 无法连接' }), d.error];
+  if (d?.state === 'error' && !Object.keys(d.entities).length) return [tr({ en: 'Home Assistant unreachable', es: 'Home Assistant no responde', 'zh-Hant': 'Home Assistant 無法連線', 'zh-Hans': 'Home Assistant 无法连接' }), errorHint(d.error, tr)];
   if (data?.state === 'missing') return [tr({ en: 'Camera not found', es: 'Cámara no encontrada', 'zh-Hant': '找不到攝影機', 'zh-Hans': '找不到摄像头' }), entity];
   if (data?.state === 'nopicture') return [tr({ en: 'This camera has no picture', es: 'Esta cámara no tiene imagen', 'zh-Hant': '這台攝影機沒有畫面', 'zh-Hans': '这个摄像头没有画面' }), tr({ en: 'It may be off, or not a camera', es: 'Puede que esté apagada, o que no sea una cámara', 'zh-Hant': '可能已關閉，或不是攝影機', 'zh-Hans': '可能已关闭，或不是摄像头' })];
   return [tr({ en: 'Waiting for the camera…', es: 'Esperando a la cámara…', 'zh-Hant': '正在等待攝影機…', 'zh-Hans': '正在等待摄像头…' })];

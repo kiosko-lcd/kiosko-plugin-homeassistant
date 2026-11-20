@@ -7,7 +7,7 @@
 import { defineSource, definePlugin, defineWidget, drawEmpty, listLayout, listOptions, t, type Box, type Graphics, type RenderContext } from '@kiosko/sdk';
 import { connect } from './connection.ts';
 import { renderEntity, stateColor, thresholdLevel } from './card.ts';
-import { drawMessage, drawRows, type Row } from './draw.ts';
+import { drawMessage, drawRows, errorHint, type Row } from './draw.ts';
 import {
   demoHome, formatNumber, isTemperature, levelOf, notices, numericState, pick, stateText,
   type Entity, type HaData, type Level, type LevelOptions,
@@ -136,7 +136,7 @@ function frame(g: Graphics, box: Box, ctx: Ctx, data: HaData | undefined): Box |
     return null;
   }
   if (data.state === 'error' && !Object.keys(data.entities).length) {
-    drawMessage(g, box, ctx, tr({ en: 'Home Assistant unreachable', es: 'Home Assistant no responde', 'zh-Hant': 'Home Assistant 無法連線', 'zh-Hans': 'Home Assistant 无法连接' }), data.error);
+    drawMessage(g, box, ctx, tr({ en: 'Home Assistant unreachable', es: 'Home Assistant no responde', 'zh-Hant': 'Home Assistant 無法連線', 'zh-Hans': 'Home Assistant 无法连接' }), errorHint(data.error, tr));
     return null;
   }
   if (data.state === 'ok') return box;
@@ -232,7 +232,7 @@ export const entities = defineWidget({
       label: { en: 'Entities', es: 'Entidades', 'zh-Hant': '實體', 'zh-Hans': '实体' },
       help: { en: 'Ids or names, in the order to list them: sensor.*_temperature, light.*, *kitchen*, !light.porch. Empty = all.', es: 'Ids o nombres, en el orden en que listarlas: sensor.*_temperature, light.*, *cocina*, !light.porch. Vacío = todas.', 'zh-Hant': 'id 或名稱，依列出的順序：sensor.*_temperature, light.*, *kitchen*, !light.porch。留空 = 全部。', 'zh-Hans': 'id 或名称，按列出的顺序：sensor.*_temperature, light.*, *kitchen*, !light.porch。留空 = 全部。' },
     }),
-    hideOff: t.boolean({ label: { en: 'Only what is on, open or wrong', es: 'Solo lo encendido, abierto o con problemas', 'zh-Hant': '只顯示開著、開啟或異常的', 'zh-Hans': '只显示开着、打开或异常的' }, help: { en: 'Leaves out what is off or closed. Numbers always stay.', es: 'Deja fuera lo apagado o cerrado. Los números se quedan siempre.', 'zh-Hant': '略過已關閉或關上的項目。數值一律保留。', 'zh-Hans': '略过已关闭或关上的项目。数值始终保留。' } }),
+    hideOff: t.boolean({ label: { en: 'Only what is on, open or wrong', es: 'Solo lo encendido, abierto o con problemas', 'zh-Hant': '只顯示開著或異常的', 'zh-Hans': '只显示开着或异常的' }, help: { en: 'Leaves out what is off or closed. Numbers always stay.', es: 'Deja fuera lo apagado o cerrado. Los números se quedan siempre.', 'zh-Hant': '略過已關閉或關上的項目。數值一律保留。', 'zh-Hans': '略过已关闭或关上的项目。数值始终保留。' } }),
     hideUnavailable: t.boolean({ label: { en: 'Hide unavailable entities', es: 'Ocultar las entidades no disponibles', 'zh-Hant': '隱藏無法使用的實體', 'zh-Hans': '隐藏不可用的实体' } }),
     decimals: t.integer({ default: -1, min: -1, max: 4, advanced: true, label: { en: 'Decimals', es: 'Decimales', 'zh-Hant': '小數位數', 'zh-Hans': '小数位数' }, help: { en: '-1 = automatic.', es: '-1 = automático.', 'zh-Hant': '-1 = 自動。', 'zh-Hans': '-1 = 自动。' } }),
     ...batteryFields(),
@@ -309,7 +309,7 @@ export const attention = defineWidget({
     ...listOptions({ layouts: ['one-line', 'detailed'] }),
     entities: t.filter({ choices: { source: SOURCE, list: 'entities' }, label: { en: 'Entities', es: 'Entidades', 'zh-Hant': '實體', 'zh-Hans': '实体' }, help: { en: 'Empty = all. Leave out the ones that are fine open with !: !binary_sensor.patio_door.', es: 'Vacío = todas. Deja fuera con ! las que pueden estar abiertas: !binary_sensor.patio_door.', 'zh-Hant': '留空 = 全部。可以開著的，用 ! 排除：!binary_sensor.patio_door。', 'zh-Hans': '留空 = 全部。可以开着的，用 ! 排除：!binary_sensor.patio_door。' } }),
     includeOpenings: t.boolean({ default: true, label: { en: 'Doors, windows and locks', es: 'Puertas, ventanas y cerraduras', 'zh-Hant': '門、窗和鎖', 'zh-Hans': '门、窗和锁' }, help: { en: 'Open doors, windows, garage doors and gates; unlocked locks.', es: 'Puertas, ventanas, garajes y cancelas abiertas; cerraduras sin cerrar.', 'zh-Hant': '開著的門、窗、車庫門和大門；未上鎖的鎖。', 'zh-Hans': '开着的门、窗、车库门和大门；未上锁的锁。' } }),
-    openMs: t.duration({ default: 0, label: { en: 'Open for at least', es: 'Abierta al menos', 'zh-Hant': '至少開啟', 'zh-Hans': '至少打开' }, help: { en: 'A door counts once it has been open this long. 0 = at once.', es: 'Una puerta cuenta cuando lleva abierta este tiempo. 0 = al momento.', 'zh-Hant': '門開啟這麼久之後才算數。0 = 立即。', 'zh-Hans': '门打开这么久之后才算。0 = 立即。' } }),
+    openMs: t.duration({ default: 0, label: { en: 'Open for at least', es: 'Abierta al menos', 'zh-Hant': '已開啟至少', 'zh-Hans': '已打开至少' }, help: { en: 'A door counts once it has been open this long. 0 = at once.', es: 'Una puerta cuenta cuando lleva abierta este tiempo. 0 = al momento.', 'zh-Hant': '門開著這麼久之後才算數。0 = 立即。', 'zh-Hans': '门开着这么久之后才算。0 = 立即。' } }),
     includeBatteries: t.boolean({ default: true, label: { en: 'Low batteries', es: 'Baterías bajas', 'zh-Hant': '電量低的電池', 'zh-Hans': '电量低的电池' } }),
     includeProblems: t.boolean({ default: true, label: { en: 'Problems', es: 'Problemas', 'zh-Hant': '異常', 'zh-Hans': '异常' }, help: { en: 'Problem and tamper sensors, lost connections, a vacuum in error.', es: 'Sensores de problema y manipulación, conexiones perdidas, un robot aspirador en error.', 'zh-Hant': '異常與防拆感測器、連線中斷、出錯的掃地機器人。', 'zh-Hans': '异常和防拆传感器、连接中断、出错的扫地机器人。' } }),
     includeUnavailable: t.boolean({ label: { en: 'Unavailable devices', es: 'Dispositivos no disponibles', 'zh-Hant': '無法使用的裝置', 'zh-Hans': '不可用的设备' } }),
@@ -373,7 +373,7 @@ export default definePlugin({
     en: 'Home Assistant on the panel, live over its WebSocket API: any entity in big with its history, lists of entities, what needs you at home (doors left open, low batteries, leaks, the alarm), your cameras (with the doorbell), the energy flow, what\'s playing and who is home.',
     es: 'Home Assistant en el panel, en directo por su API WebSocket: cualquier entidad en grande con su histórico, listas de entidades, lo que te necesita en casa (puertas abiertas, baterías bajas, fugas, la alarma), tus cámaras (con el timbre), el flujo de energía, lo que suena y quién está en casa.',
     'zh-Hant': '在面板上顯示 Home Assistant，透過其 WebSocket API 即時更新：以大字顯示任一實體及其歷史、實體清單、家中需要你處理的事（沒關的門、電量低的電池、漏水、警報）、你的攝影機（含門鈴）、能源流向、正在播放的內容，以及誰在家。',
-    'zh-Hans': '在屏幕上显示 Home Assistant，通过其 WebSocket API 实时更新：以大字显示任一实体及其历史、实体列表、家里需要你处理的事（没关的门、电量低的电池、漏水、警报）、你的摄像头（含门铃）、能源流向、正在播放的内容，以及谁在家。',
+    'zh-Hans': '在副屏上显示 Home Assistant，通过其 WebSocket API 实时更新：以大字显示任一实体及其历史、实体列表、家里需要你处理的事（没关的门、电量低的电池、漏水、警报）、你的摄像头（含门铃）、能源流向、正在播放的内容，以及谁在家。',
   },
   icon: 'house',
   widgets: [entity, entities, attention, camera, energy, media, people],
