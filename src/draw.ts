@@ -50,6 +50,7 @@ export function errorHint(error: string | undefined, tr: Ctx['t']): string | und
     return tr({
       en: 'Token refused: create a long-lived access token in Home Assistant and set it in Settings → Data sources',
       es: 'Token rechazado: crea un token de acceso de larga duración en Home Assistant y ponlo en Ajustes → Fuentes de datos',
+      de: 'Token abgelehnt: Erstelle in Home Assistant einen langlebigen Zugriffstoken und trage ihn unter Einstellungen → Datenquellen ein',
       'zh-Hant': '權杖遭拒：請在 Home Assistant 中建立長期存取權杖，並填入「設定 → 資料來源」',
       'zh-Hans': '令牌被拒绝：请在 Home Assistant 中创建长期访问令牌，并填写到“设置 → 数据源”',
     });

@@ -136,7 +136,7 @@ test('notices: dangers first, then the oldest; toggles and openMs', () => {
   // Dangers stay whatever the toggles say; the filter leaves out.
   assert.deepEqual(ids({ includeOpenings: false, includeBatteries: false, includeProblems: false }), ['binary_sensor.leak']);
   assert.ok(!ids({ entities: ['!binary_sensor.balcony'] }).includes('binary_sensor.balcony'));
-  assert.deepEqual(noticeOf(ent('sensor.remote_battery', '7', { deviceClass: 'battery' }), attn(), NOW)?.what, { en: 'Battery 7 %', es: 'Batería 7 %', 'zh-Hant': '電池 7 %', 'zh-Hans': '电池 7 %' });
+  assert.deepEqual(noticeOf(ent('sensor.remote_battery', '7', { deviceClass: 'battery' }), attn(), NOW)?.what, { en: 'Battery 7 %', es: 'Batería 7 %', de: 'Batterie 7 %', 'zh-Hant': '電池 7 %', 'zh-Hans': '电池 7 %' });
 });
 
 test('History: five-minute means, the last value held, trimmed to the span', () => {
