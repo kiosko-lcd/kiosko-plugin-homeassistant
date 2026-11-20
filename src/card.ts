@@ -121,7 +121,7 @@ function renderNumber(g: Graphics, ctx: Ctx, e: Entity, data: HaData, box: Box):
     const hour = history.values(e.id, now, 3_600_000, 12).filter((v) => Number.isFinite(v));
     const delta = hour.length >= 2 ? n - hour[0]! : 0;
     const shown = formatNumber(Math.abs(delta), locale, dec, n);
-    if (Number(shown.replace(',', '.').replace(/[^\d.]/g, '')) > 0) trend = { up: delta > 0, text: `${shown}${isTemperature(unit) ? '°' : unit ? ` ${unit}` : ''} · ${tr({ en: '1 h', es: '1 h' })}` };
+    if (Number(shown.replace(',', '.').replace(/[^\d.]/g, '')) > 0) trend = { up: delta > 0, text: `${shown}${isTemperature(unit) ? '°' : unit ? ` ${unit}` : ''} · ${tr({ en: '1 h', es: '1 h', 'zh-Hant': '1 h', 'zh-Hans': '1 h' })}` };
   }
 
   const hs = headerSize(box);
@@ -246,10 +246,10 @@ function renderClimate(g: Graphics, ctx: Ctx, e: Entity, box: Box): void {
 
   // What it is doing: "Heating · to 22°" (or the mode, when idle).
   const doing = action && action !== 'idle' && action !== 'off'
-    ? tr({ heating: { en: 'Heating', es: 'Calentando' }, cooling: { en: 'Cooling', es: 'Enfriando' }, drying: { en: 'Drying', es: 'Secando' }, fan: { en: 'Fan', es: 'Ventilando' }, preheating: { en: 'Preheating', es: 'Precalentando' } }[action] ?? { en: action })
+    ? tr({ heating: { en: 'Heating', es: 'Calentando', 'zh-Hant': '加熱中', 'zh-Hans': '制热中' }, cooling: { en: 'Cooling', es: 'Enfriando', 'zh-Hant': '冷卻中', 'zh-Hans': '制冷中' }, drying: { en: 'Drying', es: 'Secando', 'zh-Hant': '除濕中', 'zh-Hans': '除湿中' }, fan: { en: 'Fan', es: 'Ventilando', 'zh-Hant': '送風中', 'zh-Hans': '送风中' }, preheating: { en: 'Preheating', es: 'Precalentando', 'zh-Hant': '預熱中', 'zh-Hans': '预热中' } }[action] ?? { en: action })
     : stateText({ ...e, current: undefined }, ctx);
   // Without a dial the target goes after the action.
-  const target = e.target !== undefined && !off && !dial ? `${tr({ en: 'to', es: 'a' })} ${t1(e.target)}` : '';
+  const target = e.target !== undefined && !off && !dial ? `${tr({ en: 'to', es: 'a', 'zh-Hant': '至', 'zh-Hans': '至' })} ${t1(e.target)}` : '';
   const ss = Math.max(11, Math.min(22, Math.round(box.h * 0.095)));
   const subH = ss * 1.9;
   const valueTop = box.y + (headH ? headH + hs * 0.5 : 0);
