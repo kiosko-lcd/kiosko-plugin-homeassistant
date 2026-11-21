@@ -10,7 +10,7 @@
  */
 import type { Box, Graphics, RenderContext } from '@kiosko/sdk';
 import { curveScale, drawBadge, drawCurve, drawDial, drawLabel, drawTrend, alpha } from './draw.ts';
-import { autoDecimals, formatNumber, isTemperature, levelOf, numericState, stateText, type Entity, type HaData, type Level, type LevelOptions } from './ha.ts';
+import { autoDecimals, formatNumber, historyHas, historyValues, isTemperature, levelOf, numericState, stateText, type Entity, type HaData, type Level, type LevelOptions } from './ha.ts';
 import { batteryLevel, drawEntityIcon, iconFor } from './icons.ts';
 
 export interface EntityOptions {
@@ -108,9 +108,9 @@ function renderNumber(g: Graphics, ctx: Ctx, e: Entity, data: HaData, box: Box):
   const fmtLike = (v: number) => `${formatNumber(v, locale, dec, n)}${isTemperature(unit) ? '°' : ''}`;
 
   // History: one point per ~5 px, never more than the five-minute buckets.
-  const history = options.showHistory && data.history?.has(e.id) ? data.history : undefined;
+  const history = options.showHistory && historyHas(data.history, e.id) ? data.history : undefined;
   const points = Math.max(12, Math.min(Math.round(options.historyMs / 300_000), Math.floor(box.w / 5)));
-  const values = history ? history.values(e.id, now, options.historyMs, points) : [];
+  const values = history ? historyValues(history, e.id, now, options.historyMs, points) : [];
   const scale = curveScale(values, minSpan(e, n));
   const hasChart = !!scale && box.h >= 84 && box.w >= 120;
   const wide = hasChart && box.w >= box.h * 2.2;
@@ -118,7 +118,7 @@ function renderNumber(g: Graphics, ctx: Ctx, e: Entity, data: HaData, box: Box):
   // How it moved in the last hour.
   let trend: { up: boolean; text: string } | null = null;
   if (history) {
-    const hour = history.values(e.id, now, 3_600_000, 12).filter((v) => Number.isFinite(v));
+    const hour = historyValues(history, e.id, now, 3_600_000, 12).filter((v) => Number.isFinite(v));
     const delta = hour.length >= 2 ? n - hour[0]! : 0;
     const shown = formatNumber(Math.abs(delta), locale, dec, n);
     if (Number(shown.replace(',', '.').replace(/[^\d.]/g, '')) > 0) trend = { up: delta > 0, text: `${shown}${isTemperature(unit) ? '°' : unit ? ` ${unit}` : ''} · ${ctx.fmt.duration(3_600_000, { compact: true })}` };

@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { createBaseContext } from '@kiosko/sdk';
 import {
-  compact, DEFAULT_LEVELS, demoHome, formatNumber, History, levelOf, noticeOf, notices, numericState, parseHistory, pick, stateText, wantsHistory, websocketUrl,
+  compact, DEFAULT_LEVELS, demoHome, formatNumber, History, historyValues, levelOf, noticeOf, notices, numericState, parseHistory, pick, stateText, wantsHistory, websocketUrl,
   type AttentionOptions, type Entity,
 } from './ha.ts';
 
@@ -194,7 +194,7 @@ test('demo: a believable home, its states where its history ends', () => {
   assert.equal(d.state, 'ok');
   assert.equal(d.entities['binary_sensor.balcony_door']!.name, 'Puerta del balcón');
   const t = d.entities['sensor.living_room_temperature']!;
-  const v = d.history!.values(t.id, NOW, 3_600_000, 4);
+  const v = historyValues(d.history!, t.id, NOW, 3_600_000, 4);
   assert.ok(Math.abs(v.at(-1)! - Number(t.state)) < 0.1);
 });
 

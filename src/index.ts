@@ -370,7 +370,7 @@ export const attention = defineWidget({
 export default definePlugin({
   id: 'homeassistant',
   name: { en: 'Home Assistant', es: 'Home Assistant', de: 'Home Assistant', 'zh-Hant': 'Home Assistant', 'zh-Hans': 'Home Assistant' },
-  version: '0.2.3',
+  version: '0.2.4',
   languages: ['en', 'es', 'de', 'zh-Hant', 'zh-Hans'],
   sdk: '^0.2.0',
   permissions: { network: ['user'] },

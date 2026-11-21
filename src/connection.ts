@@ -106,7 +106,7 @@ export function connect(o: ConnectionOptions, emit: (d: HaData) => void, deps: {
     base: httpBase(o.url),
     ...(energy ? { energy } : {}),
     entities: Object.fromEntries(entities),
-    history,
+    history: history.data(),
   });
   const flush = () => {
     flushTimer = null;
