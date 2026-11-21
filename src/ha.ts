@@ -160,8 +160,8 @@ export interface HaData {
   /** Today's energy, when the Energy dashboard is set up. */
   energy?: EnergyToday;
   entities: Record<string, Entity>;
-  /** Numeric history. A class instance, so Kiosko compares it by identity and not by content. */
-  history?: History;
+  /** Numeric history, plain (read it with `historyHas` and `historyValues`). */
+  history?: HistoryData;
 }
 
 /** A state as the WebSocket and REST APIs send it. */
@@ -573,16 +573,77 @@ export function notices(entities: Record<string, Entity>, o: AttentionOptions, n
 export const HISTORY_SPAN_MS = 24 * 3_600_000;
 export const HISTORY_BUCKET_MS = 5 * 60_000;
 
+/** One five-minute bucket: [bucket index, sum, count, last value]. */
+export type HistoryBucket = [number, number, number, number];
+
+/**
+ * The history as the source emits it: plain data (it crosses to each
+ * screen's thread by structured clone). Read it with `historyHas` and
+ * `historyValues`.
+ */
+export interface HistoryData {
+  spanMs: number;
+  bucketMs: number;
+  /** Per entity, buckets in time order. */
+  series: Record<string, HistoryBucket[]>;
+}
+
+/** Whether the history follows `id`. */
+export const historyHas = (h: HistoryData | undefined, id: string): boolean => !!h && Object.hasOwn(h.series, id);
+
+/**
+ * `bars` values covering the last `spanMs` up to `now`, each the mean of
+ * its stretch: a bucket with samples is their mean, one without holds the
+ * last value before it. The bucket still
+ * open (the one of `now`) counts as its latest value, so the last bar is
+ * what the sensor says now. `NaN` before the first sample.
+ */
+export function historyValues(h: HistoryData, id: string, now: number, spanMs: number, bars: number): number[] {
+  const s = (Object.hasOwn(h.series, id) ? h.series[id] : undefined) ?? [];
+  const span = Math.min(spanMs, h.spanMs);
+  const out: number[] = [];
+  if (bars < 1) return out;
+  const end = Math.floor(now / h.bucketMs);
+  const start = end - Math.max(1, Math.round(span / h.bucketMs)) + 1;
+  const n = end - start + 1;
+  const per: number[] = new Array(n).fill(Number.NaN);
+  let i = 0;
+  let held = Number.NaN;
+  for (let b = start; b <= end; b++) {
+    let own: HistoryBucket | undefined;
+    while (i < s.length && s[i]![0] <= b) {
+      if (s[i]![0] === b) own = s[i];
+      held = s[i]![3];
+      i++;
+    }
+    // A closed bucket with samples is their mean; after it, the sensor holds its last value.
+    per[b - start] = own && b !== end ? own[1] / own[2] : held;
+  }
+  for (let k = 0; k < bars; k++) {
+    const from = Math.floor((k * n) / bars);
+    const to = Math.max(from + 1, Math.floor(((k + 1) * n) / bars));
+    const chunk = per.slice(from, to).filter((v) => Number.isFinite(v));
+    out.push(chunk.length ? chunk.reduce((a, v) => a + v, 0) / chunk.length : Number.NaN);
+  }
+  return out;
+}
+
 /**
  * The last day of the numeric sensors the source follows, in five-minute
  * buckets (their mean). Sensors only report when they change, so a value
  * holds until the next one: the series carries it forward.
+ *
+ * Kept inside the source; what it emits is `data()`, plain.
  */
 export class History {
   readonly spanMs: number;
   readonly bucketMs: number;
-  /** Per entity, buckets in time order: [bucket index, sum, count, last value]. */
-  private readonly series = new Map<string, [number, number, number, number][]>();
+  /** Per entity, buckets in time order. */
+  private readonly series = new Map<string, HistoryBucket[]>();
+  /** Copies of the series as last emitted, per entity; dropped when one changes. */
+  private readonly copies = new Map<string, HistoryBucket[]>();
+  /** The last `data()`, while nothing has changed since. */
+  private emitted: HistoryData | undefined;
 
   constructor(spanMs = HISTORY_SPAN_MS, bucketMs = HISTORY_BUCKET_MS) {
     this.spanMs = spanMs;
@@ -597,13 +658,21 @@ export class History {
     return this.series.size;
   }
 
+  private touched(id: string): void {
+    this.copies.delete(id);
+    this.emitted = undefined;
+  }
+
   /** Starts following `id` (with no samples yet). */
   track(id: string): void {
-    if (!this.series.has(id)) this.series.set(id, []);
+    if (this.series.has(id)) return;
+    this.series.set(id, []);
+    this.touched(id);
   }
 
   forget(id: string): void {
-    this.series.delete(id);
+    if (!this.series.delete(id)) return;
+    this.touched(id);
   }
 
   /** Adds a sample. Older than the span, or older than the newest bucket of the series: ignored. */
@@ -624,49 +693,35 @@ export class History {
     let cut = 0;
     while (cut + 1 < s.length && s[cut + 1]![0] <= oldest) cut++;
     if (cut) s.splice(0, cut);
+    this.touched(id);
   }
 
   /** Replaces a series with samples from the history API (oldest first). */
   fill(id: string, samples: { at: number; value: number }[], now: number): void {
     this.series.set(id, []);
+    this.touched(id);
     for (const x of samples) this.add(id, x.at, x.value, now);
   }
 
-  /**
-   * `bars` values covering the last `spanMs` up to `now`, each the mean of
-   * its stretch: a bucket with samples is their mean, one without holds the
-   * last value before it. The bucket still
-   * open (the one of `now`) counts as its latest value, so the last bar is
-   * what the sensor says now. `NaN` before the first sample.
-   */
+  /** See `historyValues`. */
   values(id: string, now: number, spanMs: number, bars: number): number[] {
-    const s = this.series.get(id) ?? [];
-    const span = Math.min(spanMs, this.spanMs);
-    const out: number[] = [];
-    if (bars < 1) return out;
-    const end = Math.floor(now / this.bucketMs);
-    const start = end - Math.max(1, Math.round(span / this.bucketMs)) + 1;
-    const n = end - start + 1;
-    const per: number[] = new Array(n).fill(Number.NaN);
-    let i = 0;
-    let held = Number.NaN;
-    for (let b = start; b <= end; b++) {
-      let own: [number, number, number, number] | undefined;
-      while (i < s.length && s[i]![0] <= b) {
-        if (s[i]![0] === b) own = s[i];
-        held = s[i]![3];
-        i++;
-      }
-      // A closed bucket with samples is their mean; after it, the sensor holds its last value.
-      per[b - start] = own && b !== end ? own[1] / own[2] : held;
+    return historyValues(this.data(), id, now, spanMs, bars);
+  }
+
+  /**
+   * A plain copy, for the source's data. The same object while nothing
+   * changed, and the series that didn't change are the same arrays as in
+   * the last one, so copying and comparing stay cheap.
+   */
+  data(): HistoryData {
+    if (this.emitted) return this.emitted;
+    const series: Record<string, HistoryBucket[]> = {};
+    for (const [id, s] of this.series) {
+      let copy = this.copies.get(id);
+      if (!copy) this.copies.set(id, (copy = s.map((b) => [b[0], b[1], b[2], b[3]] as HistoryBucket)));
+      series[id] = copy;
     }
-    for (let k = 0; k < bars; k++) {
-      const from = Math.floor((k * n) / bars);
-      const to = Math.max(from + 1, Math.floor(((k + 1) * n) / bars));
-      const chunk = per.slice(from, to).filter((v) => Number.isFinite(v));
-      out.push(chunk.length ? chunk.reduce((a, v) => a + v, 0) / chunk.length : Number.NaN);
-    }
-    return out;
+    return (this.emitted = { spanMs: this.spanMs, bucketMs: this.bucketMs, series });
   }
 }
 
@@ -755,5 +810,5 @@ export function demoHome(now: number, locale = 'en'): HaData {
   const w = (id: string) => Number(entities[id]!.state);
   entities['sensor.grid_power']!.state = String(Math.round(w('sensor.house_power') - w('sensor.solar_power') - w('sensor.battery_power')));
   const energy = { gridIn: 3.1, gridOut: 4.6, solar: 14.2, batteryIn: 3.4, batteryOut: 2.1, at: now };
-  return { state: 'ok', version: '2026.11.1', base: 'http://homeassistant.local:8123', energy, entities, history };
+  return { state: 'ok', version: '2026.11.1', base: 'http://homeassistant.local:8123', energy, entities, history: history.data() };
 }
