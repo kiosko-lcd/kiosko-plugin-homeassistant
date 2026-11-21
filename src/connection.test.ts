@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { AUTH_RETRY_MS, connect, ENERGY_MS, FLUSH_MS, PING_MS, RETRY_MS, type ConnectionOptions, type Timers, type WsLike } from './connection.ts';
-import type { HaData, RawState } from './ha.ts';
+import { historyValues, type HaData, type RawState } from './ha.ts';
 
 const T0 = Date.parse('2026-11-16T10:00:00Z');
 
@@ -123,7 +123,7 @@ test('authenticates, reads every state, subscribes, fills the history', async ()
   assert.equal(hist.start_time, new Date(T0 - 86_400_000).toISOString());
   c.advance(FLUSH_MS);
   // One bar per five-minute bucket over 12 h.
-  const v = out.at(-1)!.history!.values('sensor.living_room_temperature', T0, 12 * 3_600_000, 144);
+  const v = historyValues(out.at(-1)!.history!, 'sensor.living_room_temperature', T0, 12 * 3_600_000, 144);
   assert.ok(Number.isNaN(v[0]!)); // nothing known 12 h ago
   assert.equal(v[72], 20.1); // 6 h ago
   assert.equal(v.at(-1), 21.4);
@@ -145,7 +145,7 @@ test('changes arrive live, gathered into one emit per second', async () => {
   assert.equal(out.length, before + 1);
   const d = out.at(-1)!;
   assert.equal(d.entities['binary_sensor.front_door']!.state, 'on');
-  assert.equal(d.history!.values('sensor.living_room_temperature', T0, 3_600_000, 12).at(-1), 21.6);
+  assert.equal(historyValues(d.history!, 'sensor.living_room_temperature', T0, 3_600_000, 12).at(-1), 21.6);
   // An attribute the widgets don't paint changing: no emit.
   ha.change({ entity_id: 'binary_sensor.front_door', state: 'on', attributes: { friendly_name: 'Front door', device_class: 'door', linkquality: 90 }, last_changed: '2026-11-16T10:00:00Z' });
   c.advance(FLUSH_MS);
@@ -314,4 +314,26 @@ test("a camera's new token is passed on at once: the old one stops opening its p
   c.advance(FLUSH_MS);
   assert.equal(out.length, n + 1, 'only the token changed, and that is worth passing on');
   assert.equal(out.at(-1)!.entities['camera.porch']!.picture, '/api/camera_proxy/camera.porch?token=two');
+});
+
+test('what it emits is plain data, survives structuredClone, and is not changed afterwards', async () => {
+  const ha = fakeHa();
+  const c = clock();
+  const out: HaData[] = [];
+  const stop = connect(opts(), (d) => out.push(d), { ws: ha.factory, timers: c });
+  await tick();
+  c.advance(FLUSH_MS);
+  const plain = (v: unknown): boolean => typeof v !== 'function' && (!v || typeof v !== 'object' || ((Array.isArray(v) || Object.getPrototypeOf(v) === Object.prototype) && Object.values(v).every(plain)));
+  for (const d of out) {
+    assert.ok(plain(d), d.state);
+    assert.deepEqual(structuredClone(d), d);
+  }
+  const before = out.at(-1)!;
+  const kept = structuredClone(before);
+  ha.change({ entity_id: 'sensor.living_room_temperature', state: '22.5', attributes: { friendly_name: 'Living room', unit_of_measurement: '°C' }, last_changed: '2026-11-16T10:00:00Z', last_updated: '2026-11-16T10:00:00Z' });
+  c.advance(FLUSH_MS);
+  assert.notEqual(out.at(-1), before);
+  assert.equal(historyValues(out.at(-1)!.history!, 'sensor.living_room_temperature', T0, 3_600_000, 12).at(-1), 22.5);
+  assert.deepEqual(before, kept, 'the earlier snapshot stays as it was');
+  stop();
 });
