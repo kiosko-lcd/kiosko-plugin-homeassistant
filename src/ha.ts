@@ -224,6 +224,14 @@ export function compact(s: RawState): Entity {
   return e;
 }
 
+/**
+ * A key for something of one Home Assistant (a camera's last picture, a
+ * player's cover, a person's photo) kept by the widgets between fetches:
+ * the home's address and the entity, so two homes (two source profiles,
+ * Kiosko 0.2.12 on) with a `camera.front_door` each never share one.
+ */
+export const homeKey = (d: Pick<HaData, 'base'>, id: string): string => `${d.base ?? ''} ${id}`;
+
 /** `homeassistant.local:8123/` → `http://homeassistant.local:8123`: where its HTTP API is. */
 export function httpBase(address: string): string {
   let a = address.trim().replace(/\/+$/, '').replace(/\/api\/websocket$/, '');

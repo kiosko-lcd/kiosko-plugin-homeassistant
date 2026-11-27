@@ -9,7 +9,7 @@
     "zh-Hant": "Home Assistant",
     "zh-Hans": "Home Assistant"
   },
-  "version": "0.2.5",
+  "version": "0.3.0",
   "description": {
     "en": "Home Assistant on the panel, live over its WebSocket API: any entity in big with its history, lists of entities, what needs you at home (doors left open, low batteries, leaks, the alarm), your cameras (with the doorbell), the energy flow, what's playing and who is home.",
     "es": "Home Assistant en el panel, en directo por su API WebSocket: cualquier entidad en grande con su histórico, listas de entidades, lo que te necesita en casa (puertas abiertas, baterías bajas, fugas, la alarma), tus cámaras (con el timbre), el flujo de energía, lo que suena y quién está en casa.",
@@ -17,7 +17,7 @@
     "zh-Hant": "在面板上顯示 Home Assistant，透過其 WebSocket API 即時更新：以大字顯示任一實體及其歷史、實體清單、家中需要你處理的事（沒關的門、電量低的電池、漏水、警報）、你的攝影機（含門鈴）、能源流向、正在播放的內容，以及誰在家。",
     "zh-Hans": "在副屏上显示 Home Assistant，通过其 WebSocket API 实时更新：以大字显示任一实体及其历史、实体列表、家里需要你处理的事（没关的门、电量低的电池、漏水、警报）、你的摄像头（含门铃）、能源流向、正在播放的内容，以及谁在家。"
   },
-  "author": "Loksly",
+  "author": "Loksly <info@kioskolcd.dev> (https://kioskolcd.dev)",
   "license": "MIT",
   "homepage": "https://github.com/kiosko-lcd/kiosko-plugin-homeassistant#readme",
   "repository": "https://github.com/kiosko-lcd/kiosko-plugin-homeassistant.git",
@@ -1725,6 +1725,7 @@
         "zh-Hans": "你的 Home Assistant 实体状态，通过其 WebSocket API 实时获取（变化会立即显示），以及数值传感器最近一天的数据，用于历史柱状图。"
       },
       "polled": false,
+      "profiles": true,
       "options": {
         "default": {
           "url": "",
@@ -1878,5 +1879,9 @@
     }
   ],
   "interludes": [],
-  "templates": []
+  "templates": [],
+  "support": {
+    "issues": "https://github.com/kiosko-lcd/kiosko-plugin-homeassistant/issues",
+    "docs": "https://github.com/kiosko-lcd/kiosko-plugin-homeassistant#readme"
+  }
 }

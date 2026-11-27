@@ -10,7 +10,7 @@
 import { defineWidget, t, type Graphics, type Image, type RenderContext } from '@kiosko/sdk';
 import { readPicture } from './camera.ts';
 import { alpha, drawMessage } from './draw.ts';
-import { demoHome, pick, type Entity, type HaData } from './ha.ts';
+import { demoHome, homeKey, pick, type Entity, type HaData } from './ha.ts';
 import { drawIcon } from './icons.ts';
 
 const SOURCE = 'homeassistant/states';
@@ -83,10 +83,10 @@ export const media = defineWidget({
     const e = d ? pickPlayer(d.entities, options.entity) : undefined;
     if (!d?.base || !e?.picture || !options.showCover) return {};
     const key = e.picture.split('?')[0] + '|' + e.media?.title + '|' + e.media?.album;
-    const hit = covers.get(e.id);
+    const hit = covers.get(homeKey(d, e.id));
     if (hit?.key === key) return { cover: hit.img, coverOf: key };
     const img = await canvas.loadImage(Buffer.from(await readPicture(d.base, e.picture, signal)));
-    covers.set(e.id, { key, img });
+    covers.set(homeKey(d, e.id), { key, img });
     return { cover: img, coverOf: key };
   },
   redraw: ({ options, sources }) => {
@@ -119,7 +119,7 @@ export const media = defineWidget({
   demo: ({ now, locale }) => ({ sources: { [SOURCE]: demoHome(now, locale) }, data: { demo: true }, options: { entity: 'media_player.living_room_speaker' } }),
 });
 
-/** Covers already read, by player: one per player, kept while its track doesn't change. */
+/** Covers already read, by player (`homeKey`: of each home): one per player, kept while its track doesn't change. */
 const covers = new Map<string, { key: string; img: Image }>();
 
 function paintPlayer(g: Graphics, ctx: RenderContext<{ showCover: boolean; showProgress: boolean }, MediaData | undefined>, e: Entity, data: MediaData | undefined): void {

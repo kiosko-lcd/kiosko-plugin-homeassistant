@@ -14,7 +14,7 @@
 import { createHash } from 'node:crypto';
 import { defineWidget, t, type Box, type Graphics, type Image, type RenderContext } from '@kiosko/sdk';
 import { drawMessage, errorHint } from './draw.ts';
-import { demoHome, type Entity, type HaData } from './ha.ts';
+import { demoHome, homeKey, type Entity, type HaData } from './ha.ts';
 
 const SOURCE = 'homeassistant/states';
 const dataOf = (sources: Record<string, unknown>) => sources[SOURCE] as HaData | undefined;
@@ -47,7 +47,7 @@ export function ringing(e: Entity | undefined, now: number): boolean {
   return e.state === 'on';
 }
 
-/** The last picture seen of each camera, so "how old" means since it changed, not since it was read. */
+/** The last picture seen of each camera (by `homeKey`: two homes may have the same camera id), so "how old" means since it changed, not since it was read. */
 const seen = new Map<string, { hash: string; at: number }>();
 
 /** When this picture of `camera` first came in: now if it differs from the last one, or when that one did. */
@@ -149,7 +149,7 @@ export const camera = defineWidget({
     const bytes = await readPicture(d.base, e.picture, signal);
     const now = Date.now();
     const lively = motionOf(d.entities, e.id, options.motion)?.state === 'on' || ringing(options.doorbell ? d.entities[options.doorbell] : undefined, now);
-    return { state: 'ok', img: await canvas.loadImage(Buffer.from(bytes)), changedAt: pictureChangedAt(options.entity, bytes, now), ...(lively ? { lively } : {}) };
+    return { state: 'ok', img: await canvas.loadImage(Buffer.from(bytes)), changedAt: pictureChangedAt(homeKey(d, options.entity), bytes, now), ...(lively ? { lively } : {}) };
   },
   redraw: 'minute',
   urgent: ({ options, sources, now }) => {

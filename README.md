@@ -161,7 +161,7 @@ Uses: `homeassistant/states`.
 
 ### Home Assistant — `homeassistant/states`
 
-The states of your Home Assistant entities, live over its WebSocket API (a change shows at once), and the last day of the numeric sensors for the history bars. Options are set once in Kiosko → Settings → Data sources.
+The states of your Home Assistant entities, live over its WebSocket API (a change shows at once), and the last day of the numeric sensors for the history bars. Options are set in Kiosko → Settings → Data sources.
 
 | Option | Type | Default | |
 |---|---|---|---|
@@ -170,6 +170,10 @@ The states of your Home Assistant entities, live over its WebSocket API (a chang
 | `entities` | list | `[]` | Entities to read. Empty = all. Ids or names, with * and !: sensor.*, binary_sensor.*, lock.*, !sensor.*_linkquality. |
 | `history` | list | `[]` | Entities with history. Numeric sensors whose last day is kept for the history bars. Empty = every one with a unit. |
 | `maxHistory` | number | `100` | Most entities with history. Each costs a day of five-minute averages in memory (about 300 numbers). 0 = no history. |
+
+### Several homes
+
+With Kiosko 0.2.12 and later the source can have **profiles**: named configurations, each with its own address, token and entity filters, say «Flat» for `http://homeassistant.local:8123` and «Village» for `https://pueblo.example.com`. Each profile keeps its own live connection to its Home Assistant (one WebSocket each, connected while a tile uses it), and each tile picks its profile in the inspector (**Source profile**; **New profile…** makes one from the tile), where the entity, camera, player and people pickers list that home's entities. Two homes may have entities with the same id (`camera.front_door` in both): each tile still shows its own home's picture, cover and photos. Settings → Data sources shows the profiles as tabs. A tile with no profile reads the source's own options, as before; with older Kiosko versions there is one home.
 
 ## Development
 
