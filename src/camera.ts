@@ -14,7 +14,7 @@
 import { createHash } from 'node:crypto';
 import { defineWidget, t, type Box, type Graphics, type Image, type RenderContext } from '@kiosko/sdk';
 import { drawMessage, errorHint } from './draw.ts';
-import { demoHome, homeKey, type Entity, type HaData } from './ha.ts';
+import { demoHome, haDown, homeKey, type Entity, type HaData } from './ha.ts';
 
 const SOURCE = 'homeassistant/states';
 const dataOf = (sources: Record<string, unknown>) => sources[SOURCE] as HaData | undefined;
@@ -157,6 +157,8 @@ export const camera = defineWidget({
     if (d?.state !== 'ok' || !options.entity) return false;
     return motionOf(d.entities, options.entity, options.motion)?.state === 'on' || ringing(options.doorbell ? d.entities[options.doorbell] : undefined, now);
   },
+  // No picture to look at: Home Assistant not there, or a read without one (no camera chosen, not found, no picture).
+  empty: ({ sources, data }) => haDown(dataOf(sources)) || (!!data && !data.img && !data.demo),
   // Off by default: a camera's tile is for looking, not for interrupting. The user turns it on.
   takeOver: false,
   render(g, ctx) {

@@ -5,7 +5,7 @@
 import { defineWidget, t, type Graphics, type Image, type RenderContext } from '@kiosko/sdk';
 import { readPicture } from './camera.ts';
 import { alpha, drawMessage } from './draw.ts';
-import { demoHome, homeKey, pick, type Entity, type HaData } from './ha.ts';
+import { demoHome, haDown, homeKey, pick, type Entity, type HaData } from './ha.ts';
 
 const SOURCE = 'homeassistant/states';
 const dataOf = (sources: Record<string, unknown>) => sources[SOURCE] as HaData | undefined;
@@ -72,6 +72,11 @@ export const people = defineWidget({
     return out;
   },
   redraw: 'minute',
+  // Home Assistant not there, or nobody to show.
+  empty: ({ options, sources }) => {
+    const d = dataOf(sources);
+    return haDown(d) || (!!d && !peopleOf(d, options.people).length);
+  },
   render(g, ctx) {
     const { options, sources, data, t: tr } = ctx;
     const d = dataOf(sources);

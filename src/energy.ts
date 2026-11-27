@@ -11,7 +11,7 @@
  */
 import { defineWidget, t } from '@kiosko/sdk';
 import { alpha, drawMessage } from './draw.ts';
-import { demoHome, formatNumber, numericState, type EnergyToday, type Entity, type HaData } from './ha.ts';
+import { demoHome, formatNumber, haDown, numericState, type EnergyToday, type Entity, type HaData } from './ha.ts';
 import { drawIcon } from './icons.ts';
 import type { IconName } from './icon-paths.ts';
 
@@ -78,6 +78,12 @@ export function homeToday(e: EnergyToday): number | undefined {
   return Math.max(0, (e.gridIn ?? 0) + (e.solar ?? 0) + (e.batteryOut ?? 0) - (e.gridOut ?? 0) - (e.batteryIn ?? 0));
 }
 
+/** The power sensors' readings in W: the ones chosen, or the Energy dashboard's. */
+function powerOf(d: HaData, o: { grid: string; solar: string; battery: string }): { grid: number | undefined; solar: number | undefined; battery: number | undefined } {
+  const ids = { grid: o.grid || d.energy?.power?.grid, solar: o.solar || d.energy?.power?.solar, battery: o.battery || d.energy?.power?.battery };
+  return { grid: watts(ids.grid ? d.entities[ids.grid] : undefined), solar: watts(ids.solar ? d.entities[ids.solar] : undefined), battery: watts(ids.battery ? d.entities[ids.battery] : undefined) };
+}
+
 /** Below this a flow is noise: no line, no dots. */
 const IDLE_W = 10;
 
@@ -112,14 +118,21 @@ export const energy = defineWidget({
     moving: t.boolean({ default: true, label: { en: 'Moving dots', es: 'Puntos en movimiento', de: 'Bewegte Punkte', 'zh-Hant': '流動光點', 'zh-Hans': '流动光点' }, help: { en: 'Repaints the tile every second.', es: 'Vuelve a pintar la tesela cada segundo.', de: 'Zeichnet die Kachel jede Sekunde neu.', 'zh-Hant': '每秒重繪方格一次。', 'zh-Hans': '每秒重绘格子一次。' } }),
   }),
   redraw: ({ options }) => (options.moving ? 'second' : 'minute'),
+  // Home Assistant not there, or no power sensor to read.
+  empty: ({ options, sources }) => {
+    const d = dataOf(sources);
+    if (haDown(d)) return true;
+    if (!d) return false;
+    const raw = powerOf(d, options);
+    return raw.grid === undefined && raw.solar === undefined && raw.battery === undefined;
+  },
   render(g, ctx) {
     const { options, sources, t: tr, theme, locale } = ctx;
     const d = dataOf(sources);
     const box = ctx.box;
     if (!d || d.state === 'unconfigured') return drawMessage(g, box, ctx, tr({ en: 'Home Assistant not set up', es: 'Home Assistant sin configurar', de: 'Home Assistant nicht eingerichtet', 'zh-Hant': 'Home Assistant 尚未設定', 'zh-Hans': 'Home Assistant 尚未设置' }), tr({ en: 'Set its address and a token in Settings → Data sources', es: 'Pon su dirección y un token en Ajustes → Fuentes de datos', de: 'Adresse und Token unter Einstellungen → Datenquellen eintragen', 'zh-Hant': '請在「設定 → 資料來源」中填入其網址和權杖', 'zh-Hans': '请在“设置 → 数据源”中填写其网址和令牌' }));
     if (d.state === 'connecting') return drawMessage(g, box, ctx, tr({ en: 'Connecting to Home Assistant…', es: 'Conectando con Home Assistant…', de: 'Verbinde mit Home Assistant…', 'zh-Hant': '正在連線 Home Assistant…', 'zh-Hans': '正在连接 Home Assistant…' }));
-    const ids = { grid: options.grid || d.energy?.power?.grid, solar: options.solar || d.energy?.power?.solar, battery: options.battery || d.energy?.power?.battery };
-    const raw = { grid: watts(ids.grid ? d.entities[ids.grid] : undefined), solar: watts(ids.solar ? d.entities[ids.solar] : undefined), battery: watts(ids.battery ? d.entities[ids.battery] : undefined) };
+    const raw = powerOf(d, options);
     if (raw.grid === undefined && raw.solar === undefined && raw.battery === undefined) {
       return drawMessage(g, box, ctx, tr({ en: 'Choose the power sensors', es: 'Elige los sensores de potencia', de: 'Leistungssensoren wählen', 'zh-Hant': '選擇功率感測器', 'zh-Hans': '选择功率传感器' }), tr({ en: 'At least the grid one, in the inspector (or set them in the Energy dashboard of Home Assistant).', es: 'Al menos el de la red, en el inspector (o ponlos en el panel de Energía de Home Assistant).', de: 'Mindestens den des Netzes, im Inspektor (oder im Energie-Dashboard von Home Assistant festlegen).', 'zh-Hant': '至少要有電網的，在檢查器中設定（或在 Home Assistant 的能源儀表板中設定）。', 'zh-Hans': '至少要有电网的，在检查器中设置（或在 Home Assistant 的能源仪表盘中设置）。' }));
     }

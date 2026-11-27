@@ -164,6 +164,9 @@ export interface HaData {
   history?: HistoryData;
 }
 
+/** Nothing to show from Home Assistant: not set up, still connecting, or unreachable with no states known. */
+export const haDown = (d: HaData | undefined): boolean => !!d && (d.state === 'unconfigured' || d.state === 'connecting' || (d.state === 'error' && !Object.keys(d.entities).length));
+
 /** A state as the WebSocket and REST APIs send it. */
 export interface RawState {
   entity_id: string;

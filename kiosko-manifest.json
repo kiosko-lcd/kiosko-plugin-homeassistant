@@ -9,7 +9,7 @@
     "zh-Hant": "Home Assistant",
     "zh-Hans": "Home Assistant"
   },
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": {
     "en": "Home Assistant on the panel, live over its WebSocket API: any entity in big with its history, lists of entities, what needs you at home (doors left open, low batteries, leaks, the alarm), your cameras (with the doorbell), the energy flow, what's playing and who is home.",
     "es": "Home Assistant en el panel, en directo por su API WebSocket: cualquier entidad en grande con su histórico, listas de entidades, lo que te necesita en casa (puertas abiertas, baterías bajas, fugas, la alarma), tus cámaras (con el timbre), el flujo de energía, lo que suena y quién está en casa.",
