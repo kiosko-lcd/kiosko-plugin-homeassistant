@@ -140,3 +140,24 @@ test('every new widget paints every state at every size without throwing', () =>
     }
   }
 });
+
+test('camera, people and energy: empty without Home Assistant or with nothing to show, never before it answers', () => {
+  const d = home();
+  const down: HaData[] = [{ state: 'unconfigured', entities: {} }, { state: 'connecting', entities: {} }, { state: 'error', error: 'refused', entities: {} }];
+  const cam = (data: unknown, src: HaData | undefined = d) => camera.empty!({ options: validate(camera.options!, { entity: 'camera.porch' }).value, data, sources: { [SOURCE]: src }, now: NOW, working: true, workday: DEFAULT_WORKDAY } as never);
+  for (const x of down) {
+    assert.equal(cam(undefined, x), true, `camera ${x.state}`);
+    assert.equal(state(people, 'empty', {}, x), true, `people ${x.state}`);
+    assert.equal(state(energy, 'empty', {}, x), true, `energy ${x.state}`);
+  }
+  // A read without a picture: nothing to look at.
+  for (const s of ['pick', 'waiting', 'missing', 'nopicture']) assert.equal(cam({ state: s }), true, s);
+  assert.equal(cam({ state: 'ok', demo: true }), false, 'a picture');
+  assert.equal(cam(undefined), false, 'no read yet');
+  assert.equal(cam(undefined, undefined), false, 'nothing yet: loading');
+  assert.equal(state(people, 'empty', {}, d), false);
+  assert.equal(state(people, 'empty', { people: ['person.nobody'] }, d), true, 'nobody to show');
+  assert.equal(state(energy, 'empty', { grid: 'sensor.grid_power' }, d), false);
+  assert.equal(state(energy, 'empty', {}, { ...d, energy: undefined }), true, 'no power sensor');
+  for (const w of [people, energy]) assert.equal(w.empty!({ options: validate(w.options!, {}).value, data: undefined, sources: {}, now: NOW, working: true, workday: DEFAULT_WORKDAY } as never), false, `${w.id}: loading`);
+});

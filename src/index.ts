@@ -11,7 +11,7 @@ import { connect } from './connection.ts';
 import { renderEntity, stateColor, thresholdLevel } from './card.ts';
 import { drawMessage, drawRows, errorHint, type Row } from './draw.ts';
 import {
-  demoHome, formatNumber, isTemperature, levelOf, notices, numericState, pick, stateText,
+  demoHome, formatNumber, haDown, isTemperature, levelOf, notices, numericState, pick, stateText,
   type Entity, type HaData, type Level, type LevelOptions,
 } from './ha.ts';
 import { batteryLevel, iconFor } from './icons.ts';
@@ -205,6 +205,11 @@ export const entity = defineWidget({
     const e = dataOf(sources)?.entities[options.entity];
     return !!e && dataOf(sources)?.state === 'ok' && thresholdLevel(e, options) === 'alert';
   },
+  // Home Assistant not there, or no entity (chosen, or found) to show.
+  empty: ({ options, sources }) => {
+    const d = dataOf(sources);
+    return haDown(d) || (!!d && (!options.entity || !d.entities[options.entity]));
+  },
   render(g, ctx) {
     const { options, sources, t: tr } = ctx;
     const data = dataOf(sources);
@@ -249,7 +254,7 @@ export const entities = defineWidget({
   redraw: 'minute',
   empty: ({ options, sources }) => {
     const d = dataOf(sources);
-    return live(d) && !listed(d, options).length;
+    return haDown(d) || (live(d) && !listed(d, options).length);
   },
   render(g, ctx) {
     const { options, sources, theme, fmt, t: tr } = ctx;
@@ -375,7 +380,7 @@ export const attention = defineWidget({
 export default definePlugin({
   id: 'homeassistant',
   name: { en: 'Home Assistant', es: 'Home Assistant', de: 'Home Assistant', 'zh-Hant': 'Home Assistant', 'zh-Hans': 'Home Assistant' },
-  version: '0.3.0',
+  version: '0.3.1',
   languages: ['en', 'es', 'de', 'zh-Hant', 'zh-Hans'],
   sdk: '^0.2.0',
   permissions: { network: ['user'] },

@@ -107,7 +107,7 @@ test('entities: in the order of the patterns, states in words, hideOff', () => {
   assert.deepEqual(on.filter((_, i) => i % 2 === 1), ['Balcony door', 'Living room lights', 'Outdoor temperature']);
   assert.deepEqual(texts(entities, { entities: ['nothing.*'] }, d), ['No entities match']);
   assert.equal(state(entities, 'empty', { entities: ['nothing.*'] }, d), true);
-  assert.equal(state(entities, 'empty', { entities: ['nothing.*'] }, { state: 'connecting', entities: {} }), false);
+  assert.equal(state(entities, 'empty', { entities: ['nothing.*'] }, { state: 'connecting', entities: {} }), true, 'still connecting: nothing to show yet');
   assert.equal(state(entities, 'empty', { entities: ['sensor.garage_temperature'], hideUnavailable: true }, d), true);
   // Spanish.
   assert.deepEqual(texts(entities, { entities: ['binary_sensor.balcony_door'], layout: 'one-line' }, home('es'), undefined, 'es'), ['Abierta', 'Puerta del balcón']);
@@ -128,4 +128,17 @@ test('attention: what needs you, red takes the tile, idle and empty when all is 
   assert.equal(state(attention, 'idle', {}, d), false);
   assert.deepEqual(texts(attention, {}, calm, undefined, 'es'), ['Todo en orden en casa']);
   assert.ok(texts(attention, { includeUnavailable: true, includeUpdates: true, layout: 'one-line' }, d).includes('Update available'));
+});
+
+test('entity and entities: empty without Home Assistant or with nothing to show, never before it answers', () => {
+  const d = home();
+  const down: HaData[] = [{ state: 'unconfigured', entities: {} }, { state: 'connecting', entities: {} }, { state: 'error', error: 'refused', entities: {} }];
+  for (const w of [entity, entities]) {
+    for (const x of down) assert.equal(state(w, 'empty', { entity: 'sensor.living_room_temperature' }, x), true, `${w.id} ${x.state}`);
+    assert.equal(state(w, 'empty', { entity: 'sensor.living_room_temperature' }, undefined), false, `${w.id}: no data yet is loading`);
+    assert.equal(state(w, 'empty', { entity: 'sensor.living_room_temperature' }, d), false, `${w.id}: real data`);
+    assert.equal(state(w, 'empty', { entity: 'sensor.living_room_temperature' }, { ...d, state: 'offline', since: NOW - 60_000 }), false, `${w.id}: offline, the last states`);
+  }
+  assert.equal(state(entity, 'empty', {}, d), true, 'no entity chosen');
+  assert.equal(state(entity, 'empty', { entity: 'sensor.nope' }, d), true, 'entity not found');
 });
