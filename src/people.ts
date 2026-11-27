@@ -5,7 +5,7 @@
 import { defineWidget, t, type Graphics, type Image, type RenderContext } from '@kiosko/sdk';
 import { readPicture } from './camera.ts';
 import { alpha, drawMessage } from './draw.ts';
-import { demoHome, pick, type Entity, type HaData } from './ha.ts';
+import { demoHome, homeKey, pick, type Entity, type HaData } from './ha.ts';
 
 const SOURCE = 'homeassistant/states';
 const dataOf = (sources: Record<string, unknown>) => sources[SOURCE] as HaData | undefined;
@@ -15,7 +15,7 @@ export interface PeopleData {
   photos: Record<string, Image>;
 }
 
-/** Photos already read, by path: they hardly ever change. */
+/** Photos already read, by home and path (`homeKey`): they hardly ever change. */
 const photos = new Map<string, Image>();
 
 export function peopleOf(d: HaData, filter: string[] | string): Entity[] {
@@ -57,7 +57,7 @@ export const people = defineWidget({
     for (const e of peopleOf(d, options.people)) {
       if (!e.photo) continue;
       // The path without its token: the same photo, whatever the token.
-      const key = e.photo.split('?')[0]!;
+      const key = homeKey(d, e.photo.split('?')[0]!);
       try {
         let img = photos.get(key);
         if (!img) {

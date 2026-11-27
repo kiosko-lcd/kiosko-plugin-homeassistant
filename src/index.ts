@@ -3,6 +3,8 @@
  * polling) and the cards over it: one entity in big, a list of entities,
  * what needs you at home (a door left open, a low battery, a leak), a
  * camera's latest picture, the energy flow, what's playing and who is home.
+ * It has profiles (Kiosko 0.2.12 on): several homes, each with its own
+ * connection, and each tile picks one.
  */
 import { defineSource, definePlugin, defineWidget, drawEmpty, listLayout, listOptions, t, type Box, type Graphics, type RenderContext } from '@kiosko/sdk';
 import { connect } from './connection.ts';
@@ -74,6 +76,9 @@ export const states = defineSource({
   }),
   watch: (ctx, emit) => connect({ url: ctx.options.url, token: ctx.options.token, entities: ctx.options.entities, history: ctx.options.history, maxHistory: ctx.options.maxHistory }, emit, { signal: ctx.signal, log: ctx.log }),
   demo: ({ now, locale }) => demoHome(now, locale),
+  // Several homes (a flat and a village house), each with its address, token and own connection: Kiosko 0.2.12
+  // and later; older ones ignore it. Kiosko calls `watch` once per profile, so each gets its own WebSocket.
+  ...({ profiles: true } as {}),
   // Every entity it reads, by name, grouped by domain: for the entity field and the filters.
   choices: {
     entities: (d: HaData) =>
@@ -370,7 +375,7 @@ export const attention = defineWidget({
 export default definePlugin({
   id: 'homeassistant',
   name: { en: 'Home Assistant', es: 'Home Assistant', de: 'Home Assistant', 'zh-Hant': 'Home Assistant', 'zh-Hans': 'Home Assistant' },
-  version: '0.2.5',
+  version: '0.3.0',
   languages: ['en', 'es', 'de', 'zh-Hant', 'zh-Hans'],
   sdk: '^0.2.0',
   permissions: { network: ['user'] },
